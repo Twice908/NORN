@@ -1,30 +1,14 @@
-import { auth, currentUser } from '@clerk/nextjs/server'
+import { auth } from '@/auth'
 import { redirect } from 'next/navigation'
 import { prisma } from '@pulse/db'
 import Sidebar from '@/components/Sidebar'
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
-  const { userId } = auth()
-  if (!userId) redirect('/')
+  const session = await auth()
+  if (!session?.user?.id) redirect('/sign-in')
 
-  const user = await prisma.user.findUnique({ where: { clerkId: userId } })
-
-  // Local dev: the Clerk webhook can't reach localhost so user.created never fires.
-  // Auto-upsert from the current Clerk session so the dashboard is always usable.
-  if (!user) {
-    const clerkUser = await currentUser()
-    const email =
-      clerkUser?.emailAddresses.find((e) => e.id === clerkUser.primaryEmailAddressId)
-        ?.emailAddress ??
-      clerkUser?.emailAddresses[0]?.emailAddress ??
-      ''
-
-    await prisma.user.upsert({
-      where: { clerkId: userId },
-      update: {},
-      create: { clerkId: userId, email },
-    })
-  }
+  const user = await prisma.user.findUnique({ where: { id: session.user.id } })
+  if (!user) redirect('/sign-in')
 
   return (
     <div className="flex h-screen overflow-hidden bg-white dark:bg-slate-900">

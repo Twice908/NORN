@@ -1,9 +1,9 @@
 'use client'
 
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
-import { UserButton } from '@clerk/nextjs'
 import { Bell, Cpu, Settings } from 'lucide-react'
 import { useProjects } from '@/hooks/useProjects'
+import { signOutAction } from '@/app/(auth)/actions'
 
 // PAO standalone only ships the Agents views. (In the full Pulse dashboard this
 // list also includes Logs, Analytics, Errors, Alerts, Uptime, Rate Limiter,
@@ -109,14 +109,14 @@ export default function Sidebar() {
 
       {/* User */}
       <div className="border-t border-white/10 p-4">
-        <UserButton
-          appearance={{
-            elements: {
-              avatarBox: 'w-8 h-8',
-              userButtonTrigger: 'focus:ring-indigo-500',
-            },
-          }}
-        />
+        <form action={signOutAction}>
+          <button
+            type="submit"
+            className="w-full rounded-md px-3 py-2 text-left text-sm text-gray-400 hover:bg-white/5 hover:text-gray-200"
+          >
+            Sign out
+          </button>
+        </form>
       </div>
     </aside>
   )

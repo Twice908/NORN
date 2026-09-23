@@ -1,4 +1,4 @@
-import { auth } from '@clerk/nextjs/server'
+import { auth } from '@/auth'
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
 import { prisma } from '@pulse/db'
@@ -19,7 +19,8 @@ export async function PATCH(
   request: Request,
   { params }: { params: { id: string; alertId: string } },
 ): Promise<NextResponse> {
-  const { userId } = auth()
+  const session = await auth()
+  const userId = session?.user?.id
   if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const denied = await requireProjectOwnership(userId, params.id)
@@ -61,7 +62,8 @@ export async function DELETE(
   _request: Request,
   { params }: { params: { id: string; alertId: string } },
 ): Promise<NextResponse> {
-  const { userId } = auth()
+  const session = await auth()
+  const userId = session?.user?.id
   if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const denied = await requireProjectOwnership(userId, params.id)

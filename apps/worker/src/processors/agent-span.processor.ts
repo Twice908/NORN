@@ -213,6 +213,7 @@ async function handleRunEnd(data: AgentSpanJobData): Promise<void> {
       totalTokens: updatedRun.totalTokens,
       startedAt: updatedRun.startedAt,
       endedAt: updatedRun.endedAt,
+      status: updatedRun.status,
     }).catch((err: unknown) => {
       logger.error({ runId, err }, 'Failed to evaluate agent run alerts')
     })

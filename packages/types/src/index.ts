@@ -57,6 +57,10 @@ export interface AgentAlertMetrics {
 
 export interface AlertRule {
   id: string
+  name?: string
+  enabled?: boolean
+  rule?: { type: string; threshold: number; window: string }
+  channels?: { email?: { enabled?: boolean; recipients?: string[] } }
   type: AlertType
   channel: AlertChannel
   destination: string

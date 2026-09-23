@@ -1,7 +1,6 @@
 import pino from 'pino'
-import { Resend } from 'resend'
 import { prisma } from '@pulse/db'
-import { env } from '../env'
+import { sendAlertEmail } from './email'
 
 const logger = pino({ name: 'notifications' })
 
@@ -18,8 +17,24 @@ export interface NotificationPayload {
   agentRunId?: string
 }
 
+interface AlertChannels {
+  email?: {
+    enabled?: boolean
+    recipients?: string[]
+  }
+}
+
 export async function dispatch(payload: NotificationPayload): Promise<void> {
-  await prisma.alertEvent.create({
+  const alert = await prisma.alert.findUnique({
+    where: { id: payload.alertId },
+    select: { channels: true },
+  })
+  if (!alert) return
+
+  const channels = alert.channels as AlertChannels
+  const recipients = channels.email?.recipients ?? []
+  const emailEnabled = channels.email?.enabled === true && recipients.length > 0
+  const event = await prisma.alertEvent.create({
     data: {
       alertId: payload.alertId,
       projectId: payload.projectId,
@@ -27,26 +42,40 @@ export async function dispatch(payload: NotificationPayload): Promise<void> {
       triggeredValue: payload.triggeredValue,
       threshold: payload.threshold,
       message: payload.message,
-      channel: payload.channel,
-      destination: payload.destination,
+      channel: emailEnabled ? 'email' : 'none',
+      destination: emailEnabled ? recipients.join(',') : '',
+      triggeredAt: new Date(),
+      payload: {
+        alertType: payload.alertType,
+        triggeredValue: payload.triggeredValue,
+        threshold: payload.threshold,
+        message: payload.message,
+        agentRunId: payload.agentRunId ?? null,
+      },
       agentRunId: payload.agentRunId ?? null,
     },
   })
 
-  if (payload.channel === 'email') {
-    await sendEmail(payload)
-  } else {
+  logger.info({ alertId: payload.alertId, projectId: payload.projectId, ruleType: payload.alertType }, 'alert triggered')
+
+  if (emailEnabled) {
+    try {
+      await sendEmail(payload, recipients)
+      await prisma.alertEvent.update({ where: { id: event.id }, data: { deliveredAt: new Date() } })
+      logger.info({ alertId: payload.alertId, recipientsCount: recipients.length }, 'alert email sent')
+    } catch (err) {
+      const error = err instanceof Error ? err.message : String(err)
+      await prisma.alertEvent.update({ where: { id: event.id }, data: { error } })
+      logger.error({ alertId: payload.alertId, error }, 'alert email failed')
+    }
+  } else if (payload.channel === 'slack') {
     await sendSlack(payload)
+  } else {
+    logger.debug({ alertId: payload.alertId }, 'Alert email disabled or has no recipients')
   }
 }
 
-async function sendEmail(payload: NotificationPayload): Promise<void> {
-  if (!env.RESEND_API_KEY) {
-    logger.warn({ alertId: payload.alertId }, 'RESEND_API_KEY not set — skipping email notification')
-    return
-  }
-
-  const resend = new Resend(env.RESEND_API_KEY)
+async function sendEmail(payload: NotificationPayload, recipients: string[]): Promise<void> {
   const subject = `[Pulse Alert] ${payload.alertType} triggered for ${payload.projectName}`
   const dashboardUrl = process.env['NEXT_PUBLIC_APP_URL'] ?? 'http://localhost:3000'
 
@@ -64,17 +93,12 @@ async function sendEmail(payload: NotificationPayload): Promise<void> {
   <a href="${dashboardUrl}/dashboard/alerts?project=${payload.projectId}" style="display:inline-block;margin-top:24px;padding:10px 20px;background:#4f46e5;color:#fff;border-radius:6px;text-decoration:none">View in Dashboard</a>
 </div>`.trim()
 
-  try {
-    await resend.emails.send({
-      from: env.RESEND_FROM_EMAIL,
-      to: payload.destination,
-      subject,
-      html,
-    })
-    logger.info({ alertId: payload.alertId, to: payload.destination }, 'Email notification sent')
-  } catch (err) {
-    logger.error({ alertId: payload.alertId, err }, 'Failed to send email notification')
-  }
+  await sendAlertEmail({
+    to: recipients.join(','),
+    subject,
+    html,
+    alertId: payload.alertId,
+  })
 }
 
 async function sendSlack(payload: NotificationPayload): Promise<void> {

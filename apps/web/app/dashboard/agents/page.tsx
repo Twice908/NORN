@@ -8,6 +8,8 @@ import RunStatusBadge from '@/components/agents/RunStatusBadge'
 import CreateProjectModal from '@/components/CreateProjectModal'
 import { useAgentRuns } from '@/hooks/useAgents'
 import { useProjects, PROJECTS_KEY } from '@/hooks/useProjects'
+import { useAlerts } from '@/hooks/useAlerts'
+import Link from 'next/link'
 import { relativeTime } from '@/lib/utils'
 
 function formatDuration(startedAt: string, endedAt: string | null): string {
@@ -38,6 +40,7 @@ export default function AgentsPage() {
   const [showCreateModal, setShowCreateModal] = useState(false)
 
   const projectId = searchParams.get('project') ?? projects[0]?.id ?? ''
+  const { data: alerts } = useAlerts(projectId)
   const statusFilter = searchParams.get('status') ?? 'all'
   const page = Math.max(1, parseInt(searchParams.get('page') ?? '1'))
 
@@ -126,6 +129,17 @@ export default function AgentsPage() {
           onCreated={handleProjectCreated}
         />
       )}
+
+      <div className="flex items-center justify-between rounded-xl border border-gray-200 bg-white px-5 py-4 shadow-sm dark:border-slate-700 dark:bg-slate-900">
+        <div>
+          <p className="text-sm font-semibold text-gray-900 dark:text-slate-100">Alerts</p>
+          <p className="mt-1 text-xs text-gray-500 dark:text-slate-400">
+            {alerts.filter((alert) => alert.enabled ?? alert.active).length} active alerts · {alerts.reduce((total, alert) => total + (alert.channels?.email?.recipients?.length ?? (alert.channel === 'email' && alert.destination ? 1 : 0)), 0)} recipients
+          </p>
+          <p className="mt-1 text-xs text-gray-400 dark:text-slate-500">Emails captured locally at http://localhost:8025</p>
+        </div>
+        <Link href={projectId ? `/dashboard/projects/${projectId}/alerts` : '/dashboard/alerts'} className="text-sm font-medium text-indigo-600 hover:underline dark:text-indigo-400">Manage alerts</Link>
+      </div>
 
       {/* Status filter bar */}
       <div className="flex items-center gap-3">

@@ -1,13 +1,21 @@
-import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server'
+import { auth } from '@/auth'
+import { NextResponse, type NextMiddleware } from 'next/server'
 
-const isProtectedRoute = createRouteMatcher(['/dashboard(.*)'])
+const middleware = auth((req) => {
+  const isLoggedIn = !!req.auth
+  const isAuthPage = req.nextUrl.pathname.startsWith('/sign-in') || req.nextUrl.pathname.startsWith('/sign-up')
+  const isDashboard = req.nextUrl.pathname.startsWith('/dashboard')
 
-export default clerkMiddleware((auth, req) => {
-  if (isProtectedRoute(req)) {
-    auth().protect()
+  if (isDashboard && !isLoggedIn) {
+    return NextResponse.redirect(new URL('/sign-in', req.url))
   }
-})
+  if (isAuthPage && isLoggedIn) {
+    return NextResponse.redirect(new URL('/dashboard', req.url))
+  }
+}) as unknown as NextMiddleware
+
+export default middleware
 
 export const config = {
-  matcher: ['/((?!.+\\.[\\w]+$|_next).*)', '/', '/(api|trpc)(.*)'],
+  matcher: ['/dashboard/:path*', '/sign-in', '/sign-up'],
 }

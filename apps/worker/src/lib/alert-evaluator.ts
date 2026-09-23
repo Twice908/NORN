@@ -7,16 +7,38 @@ const logger = pino({ name: 'alert-evaluator' })
 
 const DEBOUNCE_TTL: Record<string, number> = {
   agent_error_rate: 600,
+  error_rate: 600,
+  run_failed: 600,
+  cost_spike: 600,
   agent_token_threshold: 3600,
   agent_execution_time: 3600,
 }
 
+type AlertRule = { type?: string; threshold?: number; window?: string }
+
+function getRule(alert: { rule?: Prisma.JsonValue; type?: string; threshold: number }): AlertRule {
+  const rule = alert.rule && typeof alert.rule === 'object' && !Array.isArray(alert.rule)
+    ? alert.rule as AlertRule
+    : {}
+  return { type: rule.type ?? alert.type, threshold: rule.threshold ?? alert.threshold, window: rule.window }
+}
+
+function windowMinutes(window: string | undefined): number {
+  switch (window) {
+    case '5m': return 5
+    case '15m': return 15
+    case '24h': return 1440
+    default: return 60
+  }
+}
+
 async function evaluateSingleAlert(
-  alert: { id: string; projectId: string; type: string; threshold: number; channel: string; destination: string; url: string | null; route: string | null; agentMetrics: Prisma.JsonValue | null },
+  alert: { id: string; projectId: string; type: string; threshold: number; channel: string; destination: string; url: string | null; route: string | null; agentMetrics: Prisma.JsonValue | null; rule: Prisma.JsonValue },
   projectName: string,
 ): Promise<void> {
   try {
-    if (alert.type === 'agent_error_rate') {
+    const rule = getRule(alert)
+    if (rule.type === 'error_rate' || rule.type === 'agent_error_rate') {
       await evaluateAgentErrorRate(alert, projectName)
     }
   } catch (err) {
@@ -34,7 +56,7 @@ export async function evaluateAgentAlerts(projectId: string): Promise<void> {
   if (!project) return
 
   const alerts = await prisma.alert.findMany({
-    where: { projectId, active: true, type: 'agent_error_rate' },
+    where: { projectId, enabled: true },
   })
 
   await Promise.all(
@@ -49,32 +71,40 @@ export async function evaluateAgentAlerts(projectId: string): Promise<void> {
 export async function evaluateAgentRunAlerts(
   projectId: string,
   runId: string,
-  run: { totalTokens: number | null; startedAt: Date; endedAt: Date | null },
+  run: { totalTokens: number | null; startedAt: Date; endedAt: Date | null; status?: string },
 ): Promise<void> {
   const project = await prisma.project.findUnique({ where: { id: projectId } })
   if (!project) return
 
   const alerts = await prisma.alert.findMany({
-    where: { projectId, active: true, type: { in: ['agent_token_threshold', 'agent_execution_time'] } },
+    where: { projectId, enabled: true },
   })
 
   await Promise.all(
     alerts.map((alert) => {
-      if (alert.type === 'agent_token_threshold') {
+      const rule = getRule(alert)
+      if (rule.type === 'agent_token_threshold') {
         return evaluateAgentTokenThreshold(alert, runId, run, project.name)
       }
-      return evaluateAgentExecutionTime(alert, runId, run, project.name)
+      if (rule.type === 'agent_execution_time') {
+        return evaluateAgentExecutionTime(alert, runId, run, project.name)
+      }
+      if (rule.type === 'run_failed') {
+        return evaluateRunFailed(alert, runId, run, project.name)
+      }
+      return Promise.resolve()
     }),
   )
 }
 
 async function evaluateAgentErrorRate(
-  alert: { id: string; projectId: string; threshold: number; channel: string; destination: string; agentMetrics: Prisma.JsonValue | null },
+  alert: { id: string; projectId: string; type: string; threshold: number; channel: string; destination: string; agentMetrics: Prisma.JsonValue | null; rule?: Prisma.JsonValue },
   projectName: string,
 ): Promise<void> {
+  const rule = getRule(alert)
   const metrics = alert.agentMetrics as { timeWindowMinutes?: number } | null
-  const windowMinutes = metrics?.timeWindowMinutes ?? 60
-  const since = new Date(Date.now() - windowMinutes * 60 * 1000)
+  const minutes = rule.window ? windowMinutes(rule.window) : metrics?.timeWindowMinutes ?? 60
+  const since = new Date(Date.now() - minutes * 60 * 1000)
 
   const rows = await prisma.$queryRaw<Array<{ total: bigint; failed: bigint }>>`
     SELECT
@@ -95,12 +125,12 @@ async function evaluateAgentErrorRate(
     alertId: alert.id,
     projectId: alert.projectId,
     projectName,
-    alertType: 'agent_error_rate',
+    alertType: rule.type ?? 'error_rate',
     channel: alert.channel as 'email' | 'slack',
     destination: alert.destination,
     triggeredValue: Math.round(errorRate * 100) / 100,
     threshold: alert.threshold,
-    message: `Agent error rate is ${errorRate.toFixed(1)}% over the last ${windowMinutes} minutes (threshold: ${alert.threshold}%).`,
+    message: `Agent error rate is ${errorRate.toFixed(1)}% over the last ${minutes} minutes (threshold: ${alert.threshold}%).`,
   })
 }
 
@@ -149,6 +179,30 @@ async function evaluateAgentExecutionTime(
     triggeredValue: durationMs,
     threshold: alert.threshold,
     message: `Agent run took ${durationMs.toLocaleString()}ms to complete, exceeding the limit of ${alert.threshold.toLocaleString()}ms. Run ID: ${runId}`,
+    agentRunId: runId,
+  })
+}
+
+async function evaluateRunFailed(
+  alert: { id: string; projectId: string; threshold: number; channel: string; destination: string; rule?: Prisma.JsonValue },
+  runId: string,
+  run: { status?: string },
+  projectName: string,
+): Promise<void> {
+  if (!['error', 'failed', 'timeout', 'interrupted'].includes(run.status ?? '')) return
+  const rule = getRule(alert)
+  if ((rule.threshold ?? 1) > 1) return
+
+  await fireAlert({
+    alertId: alert.id,
+    projectId: alert.projectId,
+    projectName,
+    alertType: 'run_failed',
+    channel: alert.channel as 'email' | 'slack',
+    destination: alert.destination,
+    triggeredValue: 1,
+    threshold: rule.threshold ?? 1,
+    message: `Agent run ${runId} failed with status ${run.status}.`,
     agentRunId: runId,
   })
 }

@@ -6,7 +6,7 @@ const logger = pino({ name: 'agent-alerts-processor' })
 
 export async function processAgentAlertsCheck(): Promise<void> {
   const rows = await prisma.alert.findMany({
-    where: { active: true, type: 'agent_error_rate' },
+    where: { enabled: true },
     select: { projectId: true },
     distinct: ['projectId'],
   })

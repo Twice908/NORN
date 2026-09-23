@@ -1,4 +1,4 @@
-import { auth } from '@clerk/nextjs/server'
+import { auth } from '@/auth'
 import { NextResponse } from 'next/server'
 import { prisma } from '@pulse/db'
 import { createHash, randomBytes } from 'node:crypto'
@@ -16,13 +16,14 @@ function getApiKeyPrefix(key: string) {
 }
 
 export async function GET() {
-  const { userId } = auth()
+  const session = await auth()
+  const userId = session?.user?.id
   if (!userId) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
   const user = await prisma.user.findUnique({
-    where: { clerkId: userId },
+    where: { id: userId },
     include: {
       projects: {
         select: { id: true, name: true, apiKeyPrefix: true, createdAt: true },
@@ -42,7 +43,8 @@ export async function GET() {
 }
 
 export async function POST(req: Request) {
-  const { userId } = auth()
+  const session = await auth()
+  const userId = session?.user?.id
   if (!userId) {
     return NextResponse.json(
       { success: false, error: { code: 'UNAUTHORIZED', message: 'Not signed in' } },
@@ -59,7 +61,7 @@ export async function POST(req: Request) {
     )
   }
 
-  const user = await prisma.user.findUnique({ where: { clerkId: userId } })
+  const user = await prisma.user.findUnique({ where: { id: userId } })
   if (!user) {
     return NextResponse.json(
       { success: false, error: { code: 'NOT_FOUND', message: 'User not found' } },

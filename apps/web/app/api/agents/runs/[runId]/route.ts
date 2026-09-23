@@ -1,4 +1,4 @@
-import { auth } from '@clerk/nextjs/server'
+import { auth } from '@/auth'
 import { NextResponse } from 'next/server'
 import { prisma } from '@pulse/db'
 import { requireProjectOwnership } from '@/lib/guards/project-ownership'
@@ -7,7 +7,8 @@ export async function GET(
   _request: Request,
   { params }: { params: { runId: string } },
 ): Promise<NextResponse> {
-  const { userId } = auth()
+  const session = await auth()
+  const userId = session?.user?.id
   if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const run = await prisma.agentRun.findUnique({ where: { id: params.runId } })

@@ -1,4 +1,4 @@
-import { auth } from '@clerk/nextjs/server'
+import { auth } from '@/auth'
 import { NextResponse } from 'next/server'
 import { prisma } from '@pulse/db'
 import { requireProjectOwnership } from '@/lib/guards/project-ownership'
@@ -9,7 +9,8 @@ export async function GET(
   request: Request,
   { params }: { params: { id: string } },
 ): Promise<NextResponse> {
-  const { userId } = auth()
+  const session = await auth()
+  const userId = session?.user?.id
   if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const denied = await requireProjectOwnership(userId, params.id)

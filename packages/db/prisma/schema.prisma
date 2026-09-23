@@ -11,12 +11,15 @@ datasource db {
 // ── Tenancy ──────────────────────────────────────────────────────────────────
 
 model User {
-  id        String    @id @default(cuid())
-  email     String    @unique
-  clerkId   String    @unique
-  plan      Plan      @default(FREE)
-  projects  Project[]
-  createdAt DateTime  @default(now())
+  id           String    @id @default(cuid())
+  email        String    @unique
+  clerkId      String?   @unique
+  passwordHash String?
+  name         String?
+  plan         Plan      @default(FREE)
+  projects     Project[]
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
 }
 
 model Project {
@@ -46,15 +49,24 @@ model Alert {
   id           String       @id @default(cuid())
   projectId    String
   project      Project      @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  type         String
-  threshold    Float
-  channel      String
-  destination  String
+  name         String       @default("Unnamed alert")
+  enabled      Boolean      @default(true)
+  rule         Json         @default("{\"type\":\"run_failed\",\"threshold\":1,\"window\":\"5m\"}")
+  channels     Json         @default("{\"email\":{\"enabled\":false,\"recipients\":[]}}")
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+  type         String       @default("run_failed")
+  threshold    Float        @default(1)
+  channel      String       @default("email")
+  destination  String       @default("")
   active       Boolean      @default(true)
   url          String?
   route        String?
   agentMetrics Json?
   events       AlertEvent[]
+
+  @@index([projectId])
+  @@index([enabled])
 }
 
 model AlertEvent {
@@ -68,6 +80,10 @@ model AlertEvent {
   channel        String
   destination    String
   sentAt         DateTime  @default(now())
+  triggeredAt    DateTime  @default(now())
+  payload        Json      @default("{}")
+  deliveredAt    DateTime?
+  error          String?
   agentRunId     String?
 
   alert          Alert?    @relation(fields: [alertId], references: [id], onDelete: SetNull)

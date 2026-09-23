@@ -119,6 +119,10 @@ run.complete(status="completed")
 
 Set `PULSE_DISABLED=true` to turn either SDK into a no-op (e.g. in tests).
 
+## Alerts
+
+Alert emails are captured by Mailpit at http://localhost:8025 in self-hosted mode. No external account required.
+
 ## Deploying PAO on free tiers
 
 PAO has five pieces to host: Postgres (+ optionally the TimescaleDB

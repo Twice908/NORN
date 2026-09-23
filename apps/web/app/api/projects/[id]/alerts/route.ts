@@ -1,4 +1,4 @@
-import { auth } from '@clerk/nextjs/server'
+import { auth } from '@/auth'
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
 import { prisma } from '@pulse/db'
@@ -40,7 +40,8 @@ export async function GET(
   _request: Request,
   { params }: { params: { id: string } },
 ): Promise<NextResponse> {
-  const { userId } = auth()
+  const session = await auth()
+  const userId = session?.user?.id
   if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const denied = await requireProjectOwnership(userId, params.id)
@@ -56,6 +57,10 @@ export async function GET(
     success: true,
     data: alerts.map((a) => ({
       id: a.id,
+      name: a.name,
+      enabled: a.enabled,
+      rule: a.rule,
+      channels: a.channels,
       type: a.type,
       channel: a.channel,
       destination: a.destination,
@@ -73,7 +78,8 @@ export async function POST(
   request: Request,
   { params }: { params: { id: string } },
 ): Promise<NextResponse> {
-  const { userId } = auth()
+  const session = await auth()
+  const userId = session?.user?.id
   if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const denied = await requireProjectOwnership(userId, params.id)
