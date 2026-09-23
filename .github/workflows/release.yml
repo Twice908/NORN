@@ -1,0 +1,29 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  github-release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
+
+  npm-publish:
+    needs: github-release
+    uses: ./.github/workflows/publish-npm.yml
+
+  pypi-publish:
+    needs: github-release
+    uses: ./.github/workflows/publish-pypi.yml
