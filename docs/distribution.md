@@ -402,7 +402,7 @@ OTel-instrumented agent, not just n8n.
 [`apps/api/openapi/openapi.yaml`](../apps/api/openapi/openapi.yaml) is an
 OpenAPI 3.1 description of the public ingest surface: `/ingest/agent-span`,
 `/ingest/otlp/v1/traces`, and `/health`. Dashboard endpoints authenticated
-with a Clerk session are deliberately excluded — they are not part of the
+ with a local session are deliberately excluded — they are not part of the
 integration contract.
 
 It carries what an integration author actually needs: the run/span/run_end
@@ -435,7 +435,7 @@ the liveness probe.
 
 Both are generated into `public/` from `apps/api/openapi/openapi.yaml` and are
 gitignored, so the spec has exactly one source of truth. Neither path is matched
-by the Clerk `isProtectedRoute` matcher, so both are public; `/docs/api` needs a
+by the dashboard auth matcher, so both are public; `/docs/api` needs a
 rewrite in `next.config.js` because Next does not resolve an extensionless path
 to `index.html` in `public/`.
 

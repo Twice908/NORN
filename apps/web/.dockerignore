@@ -1,0 +1,13 @@
+node_modules
+apps/web/node_modules
+.next
+apps/web/.next
+.turbo
+coverage
+*.log
+**/__pycache__
+**/.venv
+**/venv
+**/*.pyc
+src/**/*.test.ts
+src/**/*.spec.ts

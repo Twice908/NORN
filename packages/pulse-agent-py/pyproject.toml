@@ -21,6 +21,8 @@ dev = [
 
 [project.urls]
 Homepage = "https://usepulse.dev"
+Repository = "https://github.com/Twice908/PAO.git"
+Issues = "https://github.com/Twice908/PAO/issues"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/pulse_agent"]

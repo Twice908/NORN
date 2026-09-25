@@ -138,7 +138,7 @@ services:
       RESEND_FROM_EMAIL: ${RESEND_FROM_EMAIL:-alerts@yourdomain.com}
       NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-http://localhost:3000}
     healthcheck:
-      test: ["CMD-SHELL", "ps -ef | grep 'node dist/index.js' | grep -v grep > /dev/null || exit 1"]
+      test: ["CMD-SHELL", "node -e \"const fs=require('fs'); const running=fs.readdirSync('/proc').filter(pid => /^\\d+$/.test(pid)).some(pid => { try { return fs.readFileSync('/proc/'+pid+'/cmdline','utf8').includes('dist/index.js') } catch { return false } }); process.exit(running ? 0 : 1)\""]
       interval: 15s
       timeout: 5s
       retries: 10
@@ -171,10 +171,11 @@ services:
     ports:
       - "3000:3000"
     healthcheck:
-      test: ["CMD-SHELL", "node -e \"fetch('http://127.0.0.1:3000').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))\""]
+      test: ["CMD-SHELL", "node -e \"fetch('http://127.0.0.1:3000/api/health').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))\""]
       interval: 15s
       timeout: 5s
-      retries: 10
+      retries: 5
+      start_period: 30s
 
 volumes:
   pgdata:
