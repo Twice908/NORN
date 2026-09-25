@@ -1,4 +1,4 @@
-"""AgentRun: mirrors `packages/pulse-agent/src/run.ts`."""
+"""AgentRun: mirrors `packages/norn-agent/src/run.ts`."""
 
 import threading
 import uuid

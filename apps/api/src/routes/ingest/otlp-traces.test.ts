@@ -6,7 +6,7 @@ import { otlpTraceRoutes } from './otlp-traces'
 vi.mock('../../env', () => ({
   env: { NODE_ENV: 'test', PORT: '3001', REDIS_URL: 'redis://localhost:6379', DATABASE_URL: 'postgresql://localhost/test', API_KEY_SECRET: 'test_secret_at_least_32_characters_long', CLERK_SECRET_KEY: 'sk_test_xxx', CLERK_WEBHOOK_SECRET: 'whsec_xxx' },
 }))
-vi.mock('@pulse/db', () => ({ prisma: { project: { findUnique: vi.fn() } } }))
+vi.mock('@norn/db', () => ({ prisma: { project: { findUnique: vi.fn() } } }))
 vi.mock('../../lib/queue', () => ({ agentSpansQueue: { add: vi.fn().mockResolvedValue(undefined) } }))
 
 // ─── Protobuf fixture builder ────────────────────────────────────────────────
@@ -98,7 +98,7 @@ describe('POST /ingest/otlp/v1/traces', () => {
 
   beforeEach(async () => {
     app = await buildApp()
-    const { prisma } = await import('@pulse/db')
+    const { prisma } = await import('@norn/db')
     vi.mocked(prisma.project.findUnique).mockResolvedValue({ id: 'proj_test' } as never)
   })
 
@@ -113,7 +113,7 @@ describe('POST /ingest/otlp/v1/traces', () => {
   })
 
   it('returns 401 for an unknown API key', async () => {
-    const { prisma } = await import('@pulse/db')
+    const { prisma } = await import('@norn/db')
     vi.mocked(prisma.project.findUnique).mockResolvedValue(null)
     const res = await app.inject({ method: 'POST', url: URL, headers: AUTH, payload: JSON_BODY })
     expect(res.statusCode).toBe(401)

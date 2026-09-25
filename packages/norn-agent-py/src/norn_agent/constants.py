@@ -1,7 +1,7 @@
-"""Shared constants for the Pulse Agent Observe (PAO) Python SDK.
+"""Shared constants for the Norn Agent Observe (Norn) Python SDK.
 
 These mirror the `SpanType` union and status literals used by the
-`@pulse/agent` npm package and validated by the PAO backend's Zod schema
+`@norn/agent` npm package and validated by the Norn backend's Zod schema
 for `POST /ingest/agent-span`.
 """
 

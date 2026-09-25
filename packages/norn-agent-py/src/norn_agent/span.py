@@ -1,4 +1,4 @@
-"""AgentSpan: mirrors `packages/pulse-agent/src/span.ts`."""
+"""AgentSpan: mirrors `packages/norn-agent/src/span.ts`."""
 
 from typing import Any, Callable, Dict, Optional
 

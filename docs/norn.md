@@ -1,29 +1,29 @@
-# claude.pulse_agent_observe.md
-# PAO — Pulse Agent Observe: Claude Code Project Instructions
+# claude.norn_agent_observe.md
+# Norn — Norn Agent Observe: Claude Code Project Instructions
 
 ---
 
-> **Status note**: This is the original design spec written when PAO was a
-> feature living inside the Pulse monorepo ("not a new product, a new event
-> type within Pulse"). PAO has since been extracted into this standalone
+> **Status note**: This is the original design spec written when Norn was a
+> feature living inside the Norn monorepo ("not a new product, a new event
+> type within Norn"). Norn has since been extracted into this standalone
 > repo with its own scoped Prisma schema, API, worker, and dashboard. The
 > architecture, data models, and SDK design below are still accurate; for
 > the current setup, deployment, and task-completion status see
-> [README.md](../README.md) and [pao-tasks.md](pao-tasks.md).
+> [README.md](../README.md) and [norn-tasks.md](norn-tasks.md).
 
 ## What This Feature Is
 
-**PAO (Pulse Agent Observe)** is an AI agent observability layer built on top of Pulse's existing backend monitoring infrastructure. Where Pulse tracks HTTP requests, PAO tracks AI agent executions — LLM calls, tool invocations, inter-agent messages, cost/token usage, and anomalies like infinite loops or runaway cost.
+**Norn (Norn Agent Observe)** is an AI agent observability layer built on top of Norn's existing backend monitoring infrastructure. Where Norn tracks HTTP requests, Norn tracks AI agent executions — LLM calls, tool invocations, inter-agent messages, cost/token usage, and anomalies like infinite loops or runaway cost.
 
-PAO is **not a new product**. It is a new event type and set of views within Pulse. Everything reuses the existing ingestion pipeline, queue, worker, and dashboard shell.
+Norn is **not a new product**. It is a new event type and set of views within Norn. Everything reuses the existing ingestion pipeline, queue, worker, and dashboard shell.
 
-**Target user**: A developer running an AI agent (LangChain, CrewAI, custom OpenAI loops, etc.) who wants the same observability they'd get from Pulse for HTTP — but for agent runs. They want to answer: What did my agent do? How long did each step take? How much did it cost? Did it loop?
+**Target user**: A developer running an AI agent (LangChain, CrewAI, custom OpenAI loops, etc.) who wants the same observability they'd get from Norn for HTTP — but for agent runs. They want to answer: What did my agent do? How long did each step take? How much did it cost? Did it loop?
 
 ---
 
 ## Architecture
 
-PAO adds one new ingest route and new worker handlers to the existing pipeline. Nothing is rebuilt.
+Norn adds one new ingest route and new worker handlers to the existing pipeline. Nothing is rebuilt.
 
 ```
 Agent Span (SDK)
@@ -128,17 +128,17 @@ CREATE INDEX ON agent_spans (project_id, started_at DESC);
 
 ## SDK Design
 
-The SDK lives in `packages/pulse-agent/` (a separate npm package: `@pulse/agent`).
+The SDK lives in `packages/norn-agent/` (a separate npm package: `@norn/agent`).
 
 ### Public API
 
 ```ts
-import { PulseAgent } from '@pulse/agent'
+import { NornAgent } from '@norn/agent'
 
-const pulse = new PulseAgent({ apiKey: 'pk_live_...' })
+const norn = new NornAgent({ apiKey: 'pk_live_...' })
 
 // Start a top-level run
-const run = await pulse.startRun('Summarize quarterly report', {
+const run = await norn.startRun('Summarize quarterly report', {
   metadata: { triggeredBy: 'cron' }
 })
 
@@ -170,7 +170,7 @@ await run.complete({ status: 'failed', errorMessage: err.message })
 - The SDK buffers spans in memory and flushes on `run.complete()` OR after 5 seconds, whichever comes first
 - No span data is ever logged to stdout by default
 - `inputPreview` and `outputPreview` are truncated to 500 chars by the SDK before sending — never send full prompts
-- The SDK exports a no-op stub when `PULSE_DISABLED=true` is set, so it never affects test environments
+- The SDK exports a no-op stub when `NORN_DISABLED=true` is set, so it never affects test environments
 
 ### Ingest payload shape
 
@@ -263,7 +263,7 @@ All new pages live under `/dashboard/agents/` in the Next.js app.
 - `/api/agents/runs` and `/api/agents/runs/[runId]` Next.js API routes
 - Run list UI page
 - Basic run detail page (span table only, no Gantt yet)
-- SDK: `PulseAgent` class with `startRun`, `startSpan`, `span.end`, `run.complete`
+- SDK: `NornAgent` class with `startRun`, `startSpan`, `span.end`, `run.complete`
 
 ### Phase B — Gantt Timeline + Agent Topology Graph
 - Gantt chart component (Recharts or custom SVG)
@@ -283,13 +283,13 @@ All new pages live under `/dashboard/agents/` in the Next.js app.
 
 ### Phase E — Unified Timeline
 - Merge HTTP request logs + agent spans on one timeline per time window
-- Correlate agent runs triggered by HTTP requests (via `x-pulse-run-id` header)
+- Correlate agent runs triggered by HTTP requests (via `x-norn-run-id` header)
 
 ---
 
 ## Coding Conventions
 
-Follow all existing Pulse conventions exactly:
+Follow all existing Norn conventions exactly:
 
 - **TypeScript everywhere** — no `any`, explicit return types on all functions
 - **Zod for all validation** — every ingest route input validated with Zod schema before queuing
@@ -298,7 +298,7 @@ Follow all existing Pulse conventions exactly:
 - **Error handling** — all worker handlers wrapped in try/catch; failed jobs retry 3x with exponential backoff; dead-letter after 3 failures
 - **Environment variables** — all config via env vars, validated at startup with `zod.parse` on `process.env`
 - **File naming** — `kebab-case.ts` for files, `PascalCase` for classes and types, `camelCase` for functions
-- **No console.log in production code** — use the existing Pino logger instance (`import { logger } from '@pulse/logger'`)
+- **No console.log in production code** — use the existing Pino logger instance (`import { logger } from '@norn/logger'`)
 - **Tests** — unit tests for worker handlers (mock Prisma), integration tests for ingest routes (real Redis, test DB)
 
 ---
@@ -307,6 +307,6 @@ Follow all existing Pulse conventions exactly:
 
 - Do not store full prompt/response bodies — only `inputPreview` and `outputPreview` (max 500 chars each)
 - Do not block the agent's execution thread — all SDK network calls are fire-and-forget
-- Do not create a separate auth system for PAO — reuse the existing API key middleware
-- Do not add PAO-specific tables to TimescaleDB unless they are genuinely time-series (agent spans are; agent definitions are not)
+- Do not create a separate auth system for Norn — reuse the existing API key middleware
+- Do not add Norn-specific tables to TimescaleDB unless they are genuinely time-series (agent spans are; agent definitions are not)
 - Do not build Phase B, C, D, or E features until Phase A is complete and tested

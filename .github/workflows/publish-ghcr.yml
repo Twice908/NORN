@@ -35,7 +35,7 @@ jobs:
       - uses: docker/metadata-action@v5
         id: meta
         with:
-          images: ghcr.io/${{ github.repository_owner }}/pao-${{ matrix.service }}
+          images: ghcr.io/${{ github.repository_owner }}/norn-${{ matrix.service }}
           tags: |
             type=ref,event=tag
             type=semver,pattern={{version}}

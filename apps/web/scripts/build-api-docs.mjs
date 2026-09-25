@@ -28,7 +28,7 @@ copyFileSync(spec, resolve(publicDir, 'openapi.yaml'))
 
 execFileSync(
   'npx',
-  ['redocly', 'build-docs', spec, '-o', docsHtml, '--title', 'PAO Ingest API reference'],
+  ['redocly', 'build-docs', spec, '-o', docsHtml, '--title', 'Norn Ingest API reference'],
   { stdio: 'inherit' },
 )
 

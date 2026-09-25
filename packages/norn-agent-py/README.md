@@ -1,18 +1,18 @@
-# pulse-agent
+# norn-agent
 
-Python SDK for [Pulse Agent Observe (PAO)](https://usepulse.dev) — AI agent
-observability. This package mirrors the [`@pulse/agent`](../pulse-agent)
+Python SDK for [Norn Agent Observe (Norn)](https://usepulse.dev) — AI agent
+observability. This package mirrors the [`@norn/agent`](../norn-agent)
 npm package: same payload shapes, same `/ingest/agent-span` endpoint, same
 fire-and-forget guarantees.
 
 ## Quick start
 
 ```python
-from pulse_agent import PulseAgent
+from norn_agent import NornAgent
 
-pulse = PulseAgent(api_key="pk_live_...")
+norn = NornAgent(api_key="pk_live_...")
 
-run = pulse.start_run("My Task")
+run = norn.start_run("My Task")
 span = run.start_span("llm_call", model="gpt-4o", input_preview="What is 2+2?")
 span.end(output_preview="4", input_tokens=12, output_tokens=1, status="success")
 run.complete(status="completed")
@@ -21,14 +21,14 @@ run.complete(status="completed")
 ## Configuration
 
 ```python
-PulseAgent(
+NornAgent(
     api_key="pk_live_...",   # required
     base_url="https://api.usepulse.dev",  # optional, defaults to api.usepulse.dev
     flush_interval_ms=30_000,             # optional, auto-flush interval for buffered spans
 )
 ```
 
-Set `PULSE_DISABLED=true` to turn the SDK into a complete no-op (every
+Set `NORN_DISABLED=true` to turn the SDK into a complete no-op (every
 method returns immediately and no network calls are made) — useful in
 tests and CI.
 

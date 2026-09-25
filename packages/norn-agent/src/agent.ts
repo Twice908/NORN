@@ -3,7 +3,7 @@ import type { AgentSpanPayload, StartRunOpts } from './types'
 
 const DEFAULT_HOST = 'https://api.usepulse.dev'
 
-export class PulseAgent {
+export class NornAgent {
   private readonly apiKey: string
   private readonly host: string
   private readonly disabled: boolean
@@ -11,7 +11,7 @@ export class PulseAgent {
   constructor(opts: { apiKey: string; host?: string }) {
     this.apiKey = opts.apiKey
     this.host = opts.host ?? DEFAULT_HOST
-    this.disabled = process.env['PULSE_DISABLED'] === 'true'
+    this.disabled = process.env['NORN_DISABLED'] === 'true'
   }
 
   async startRun(task: string, opts: StartRunOpts = {}): Promise<AgentRun> {

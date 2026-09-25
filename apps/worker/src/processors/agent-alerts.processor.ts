@@ -1,5 +1,5 @@
 import pino from 'pino'
-import { prisma } from '@pulse/db'
+import { prisma } from '@norn/db'
 import { evaluateAgentAlerts } from '../lib/alert-evaluator'
 
 const logger = pino({ name: 'agent-alerts-processor' })

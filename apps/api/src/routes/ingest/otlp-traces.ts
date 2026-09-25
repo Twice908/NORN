@@ -1,6 +1,6 @@
 import { gunzipSync } from 'node:zlib'
 import type { FastifyInstance } from 'fastify'
-import { prisma } from '@pulse/db'
+import { prisma } from '@norn/db'
 import { hashApiKey } from '../../lib/api-key'
 import { agentSpansQueue } from '../../lib/queue'
 import { decodeTracesJson, decodeTracesProtobuf, toPaoPayloads } from '../../lib/otlp/decode-traces'
@@ -8,13 +8,13 @@ import { decodeTracesJson, decodeTracesProtobuf, toPaoPayloads } from '../../lib
 /**
  * OTLP/HTTP trace ingest.
  *
- * Lets any OpenTelemetry-instrumented agent report to PAO with no PAO-specific
+ * Lets any OpenTelemetry-instrumented agent report to Norn with no Norn-specific
  * code: n8n (N8N_OTEL_ENABLED + N8N_AGENTS_TRACING_ENABLED), OpenLLMetry,
  * OpenInference, or a plain OTel collector, simply by pointing the OTLP
  * exporter here.
  *
  * Deviations from a strict OTLP server, all deliberate:
- *   - Auth is PAO's own Bearer API key rather than anything OTLP specifies;
+ *   - Auth is Norn's own Bearer API key rather than anything OTLP specifies;
  *     exporters pass it via OTEL_EXPORTER_OTLP_HEADERS.
  *   - The response body is JSON, not a protobuf ExportTraceServiceResponse.
  *     Exporters treat any 2xx as success, and emitting protobuf would mean
@@ -86,7 +86,7 @@ export async function otlpTraceRoutes(app: FastifyInstance): Promise<void> {
     const payloads = toPaoPayloads(decoded.spans)
 
     // Fire and forget, matching /ingest/agent-span: an exporter must never
-    // block on PAO's queue.
+    // block on Norn's queue.
     for (const payload of payloads) {
       agentSpansQueue.add('process', { ...payload, projectId: project.id }).catch((err: unknown) => {
         request.log.warn({ err }, 'Failed to enqueue OTLP-derived span')

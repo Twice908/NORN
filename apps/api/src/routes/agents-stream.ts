@@ -1,6 +1,6 @@
 import type { FastifyInstance } from 'fastify'
 import IORedis from 'ioredis'
-import { prisma } from '@pulse/db'
+import { prisma } from '@norn/db'
 import { verifyClerkJwt } from '../lib/auth'
 import { env } from '../env'
 

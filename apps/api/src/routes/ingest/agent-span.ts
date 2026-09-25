@@ -1,5 +1,5 @@
 import type { FastifyInstance } from 'fastify'
-import { prisma } from '@pulse/db'
+import { prisma } from '@norn/db'
 import { hashApiKey } from '../../lib/api-key'
 import { agentSpansQueue } from '../../lib/queue'
 import { randomUUID } from 'node:crypto'

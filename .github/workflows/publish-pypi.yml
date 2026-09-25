@@ -28,11 +28,11 @@ jobs:
           python -m pip install build twine
 
       - name: Build distribution
-        working-directory: packages/pulse-agent-py
+        working-directory: packages/norn-agent-py
         run: python -m build
 
       - name: Validate package metadata
-        working-directory: packages/pulse-agent-py
+        working-directory: packages/norn-agent-py
         run: python -m twine check dist/*
 
       - name: Publish to PyPI

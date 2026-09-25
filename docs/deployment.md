@@ -1,6 +1,6 @@
 # Deployment
 
-PAO can run as a Docker Compose stack on a self-hosted machine or as separate
+Norn can run as a Docker Compose stack on a self-hosted machine or as separate
 services on infrastructure that supports Docker containers. Configure the
 application with the environment variables in `.env.example` and keep
 `AUTH_SECRET`, database credentials, and production email credentials private.
@@ -10,9 +10,9 @@ application with the environment variables in `.env.example` and keep
 Release tags publish multi-architecture images to GitHub Container Registry:
 
 ```bash
-docker pull ghcr.io/<owner>/pao-api:latest
-docker pull ghcr.io/<owner>/pao-worker:latest
-docker pull ghcr.io/<owner>/pao-web:latest
+docker pull ghcr.io/Twice908/norn-api:latest
+docker pull ghcr.io/Twice908/norn-worker:latest
+docker pull ghcr.io/Twice908/norn-web:latest
 ```
 
 The GHCR workflow runs for `v*` tags or by manual dispatch. It publishes

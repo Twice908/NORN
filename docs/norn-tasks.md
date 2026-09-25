@@ -1,6 +1,6 @@
-# Tasks.md — PAO Phase A: Span Ingestion + Basic Run List
+# Tasks.md — Norn Phase A: Span Ingestion + Basic Run List
 
-Phase A goal: A developer can install `@pulse/agent`, wrap their agent run, and see a list of runs with span details in the Pulse dashboard.
+Phase A goal: A developer can install `@norn/agent`, wrap their agent run, and see a list of runs with span details in the Norn dashboard.
 
 **Scope**: Schema → Ingestion route → Worker → API routes → Dashboard UI → SDK
 
@@ -8,11 +8,11 @@ Phase A goal: A developer can install `@pulse/agent`, wrap their agent run, and 
 
 ## 1. Database & Schema
 
-- [x] **1.1 Add PAO models to Prisma schema**
+- [x] **1.1 Add Norn models to Prisma schema**
   `AgentDefinition`, `AgentRun`, and `AgentSpan` models are present in `packages/db/prisma/schema.prisma` with back-relations from `Project`.
 
 - [x] **1.2 Generate and run Prisma migration**
-  `packages/db/prisma/migrations/0001_init/migration.sql` creates the PAO-scoped schema (Project/Alert/AlertEvent + the three Agent models).
+  `packages/db/prisma/migrations/0001_init/migration.sql` creates the Norn-scoped schema (Project/Alert/AlertEvent + the three Agent models).
 
 - [x] **1.3 Create TimescaleDB hypertable migration**
   `packages/db/prisma/migrations/0002_agent_spans_hypertable/migration.sql` calls `create_hypertable('agent_spans', 'started_at', if_not_exists => TRUE)` and adds the `(run_id, started_at DESC)` / `(project_id, started_at DESC)` indexes. Not applied by `prisma migrate deploy`/`db:push` automatically — run it manually with `psql` (see README setup steps).
@@ -111,11 +111,11 @@ Phase A goal: A developer can install `@pulse/agent`, wrap their agent run, and 
 
 ## 6. SDK Package
 
-- [x] **6.1 Scaffold @pulse/agent package**
-  Create `packages/pulse-agent/` with `package.json` (name: `@pulse/agent`, main: `dist/index.js`, types: `dist/index.d.ts`), `tsconfig.json` (extends root), and `src/index.ts`. Add to the monorepo workspace.
+- [x] **6.1 Scaffold @norn/agent package**
+  Create `packages/norn-agent/` with `package.json` (name: `@norn/agent`, main: `dist/index.js`, types: `dist/index.d.ts`), `tsconfig.json` (extends root), and `src/index.ts`. Add to the monorepo workspace.
 
-- [x] **6.2 Implement PulseAgent class**
-  In `src/agent.ts`, implement `PulseAgent` with:
+- [x] **6.2 Implement NornAgent class**
+  In `src/agent.ts`, implement `NornAgent` with:
   - Constructor: accepts `{ apiKey: string, host?: string }` (default host: `https://api.usepulse.dev`)
   - `startRun(task: string, opts?): Promise<AgentRun>` — sends `run_start` payload, returns run handle
   - Internal: `_flush(payloads)` — fire-and-forget POST to `/ingest/agent-span`, silent on error
@@ -134,13 +134,13 @@ Phase A goal: A developer can install `@pulse/agent`, wrap their agent run, and 
   - Does NOT send to API directly — run handles all flushing
 
 - [x] **6.5 Add no-op mode**
-  At the top of `PulseAgent` constructor: if `process.env.PULSE_DISABLED === 'true'`, replace all methods with no-ops that return immediately. Prevents any SDK activity in test environments.
+  At the top of `NornAgent` constructor: if `process.env.NORN_DISABLED === 'true'`, replace all methods with no-ops that return immediately. Prevents any SDK activity in test environments.
 
 - [x] **6.6 Build and publish config**
-  Configure `tsup` (or `tsc`) to build to `dist/`. Add `build` and `prepublishOnly` scripts. Confirm the package can be imported in a plain Node.js script with `import { PulseAgent } from '@pulse/agent'`.
+  Configure `tsup` (or `tsc`) to build to `dist/`. Add `build` and `prepublishOnly` scripts. Confirm the package can be imported in a plain Node.js script with `import { NornAgent } from '@norn/agent'`.
 
 - [x] **6.7 Write SDK unit tests**
-  Test `PulseAgent`, `AgentRun`, `AgentSpan` with mocked `fetch`:
+  Test `NornAgent`, `AgentRun`, `AgentSpan` with mocked `fetch`:
   - `startRun` sends correct `run_start` payload
   - `span.end` adds payload to buffer (does not call fetch)
   - `run.complete` flushes all spans + sends `run_end`
@@ -152,7 +152,7 @@ Phase A goal: A developer can install `@pulse/agent`, wrap their agent run, and 
 ## 7. Integration Smoke Test
 
 - [x] **7.1 Manual end-to-end smoke test**
-  `scripts/test-pao-e2e.ts` sends `run_start` -> `span` -> `run_end` via `@pulse/agent` against a running `apps/api`. Run with `PULSE_TEST_KEY=pk_live_... npm run test:e2e` and verify the run appears in `/dashboard/agents`.
+  `scripts/test-norn-e2e.ts` sends `run_start` -> `span` -> `run_end` via `@norn/agent` against a running `apps/api`. Run with `NORN_TEST_KEY=pk_live_... npm run test:e2e` and verify the run appears in `/dashboard/agents`.
 
 - [ ] **7.2 Verify data scoping**
   Manual QA step — using two different API keys (two test projects), send agent spans for each and confirm each dashboard only shows its own project's runs. Not yet re-verified after the latest changes; run before relying on multi-tenant isolation in production.
@@ -161,7 +161,7 @@ Phase A goal: A developer can install `@pulse/agent`, wrap their agent run, and 
 
 ## Phase A Done When
 
-- [ ] A developer can run the smoke test script and see their run in the dashboard in < 5 seconds (script exists at `scripts/test-pao-e2e.ts`; needs a live run against deployed infra to confirm timing)
+- [ ] A developer can run the smoke test script and see their run in the dashboard in < 5 seconds (script exists at `scripts/test-norn-e2e.ts`; needs a live run against deployed infra to confirm timing)
 - [x] Run list shows correct status, duration, token count, and cost
 - [x] Span table shows all span types with correct colors and durations
 - [x] Span detail panel shows `inputPreview`, `outputPreview`, and metadata
@@ -199,7 +199,7 @@ The spec only calls for a warning on missing `runId`. Missing `spanId` is not ha
 The routes live at `/api/agents/runs` (no `[projectId]` segment). Project scoping is done via `?project=<projectId>` query param, matching the existing dashboard pattern (`/dashboard/logs?project=...`). Both routes enforce the `?project` param is present before proceeding.
 
 ### Guard returns null-on-success, NextResponse-on-failure
-`requireProjectOwnership` returns `null` when access is granted and a `403 NextResponse` when not. Callers do `const denied = await requireProjectOwnership(...); if (denied) return denied`. This avoids throwing and keeps the early-return pattern consistent with existing Pulse API routes.
+`requireProjectOwnership` returns `null` when access is granted and a `403 NextResponse` when not. Callers do `const denied = await requireProjectOwnership(...); if (denied) return denied`. This avoids throwing and keeps the early-return pattern consistent with existing Norn API routes.
 
 ### Ownership check on run detail uses run's own projectId
 The `GET /api/agents/runs/[runId]` route first fetches the run, then passes `run.projectId` to the guard. An attacker cannot infer another project's run IDs because a 404 is returned first if the run doesn't exist at all — the ownership check is only exercised when the run exists. This prevents both data leakage and project enumeration.

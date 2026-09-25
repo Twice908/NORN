@@ -75,7 +75,7 @@ describe('decodeMessage', () => {
   })
 
   it('skips unknown fields without failing', () => {
-    // Field 99 is not one PAO reads; it must not break decoding of field 1.
+    // Field 99 is not one Norn reads; it must not break decoding of field 1.
     const msg = new Uint8Array([...str(99, 'ignored'), ...str(1, 'kept')])
     const fields = decodeMessage(msg)
     expect(getString(fields, 1)).toBe('kept')

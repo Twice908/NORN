@@ -2,7 +2,7 @@
 
 ## 0.1.0
 
-- Initial release. Python port of `@pulse/agent`: `PulseAgent`, `AgentRun`,
+- Initial release. Python port of `@norn/agent`: `NornAgent`, `AgentRun`,
   `AgentSpan`, with context-manager helpers for common span types
   (`with_llm_span`, `with_memory_span`, `with_agent_message_span`,
   `with_http_span`, `with_db_span`, `with_file_span`, `with_embedding_span`,

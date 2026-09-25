@@ -1,11 +1,11 @@
 openapi: 3.1.0
 
 info:
-  title: PAO Ingest API
+  title: Norn Ingest API
   version: 0.1.0
-  summary: Ingest AI agent runs, spans, and OpenTelemetry traces into Pulse Agent Observe.
+  summary: Ingest AI agent runs, spans, and OpenTelemetry traces into Norn Agent Observe.
   description: |
-    **Pulse Agent Observe (PAO)** is an observability layer for AI agents. It records
+    **Norn Agent Observe (Norn)** is an observability layer for AI agents. It records
     agent *runs* and the *spans* within them — LLM calls, tool calls, memory reads,
     inter-agent messages — along with token usage, cost, and errors.
 
@@ -18,7 +18,7 @@ info:
     | Endpoint | Use it when |
     |---|---|
     | `POST /ingest/agent-span` | You control the code or you are assembling a payload by hand (n8n, Make, Zapier, a webhook). |
-    | `POST /ingest/otlp/v1/traces` | You already emit OpenTelemetry. Point any OTLP exporter here and send nothing PAO-specific. |
+    | `POST /ingest/otlp/v1/traces` | You already emit OpenTelemetry. Point any OTLP exporter here and send nothing Norn-specific. |
 
     Both share one API key and one processing pipeline.
 
@@ -30,7 +30,7 @@ info:
     Authorization: Bearer pk_live_...
     ```
 
-    Keys are issued per project in the PAO dashboard. A key identifies the project
+    Keys are issued per project in the Norn dashboard. A key identifies the project
     that telemetry is written to, so treat it as a write credential and keep it out
     of client-side code.
 
@@ -53,7 +53,7 @@ info:
     ## Cost
 
     Supply `costUsd` if you have it. If you omit it but provide `model` with token
-    counts, PAO derives the cost from a built-in pricing table. An unrecognised
+    counts, Norn derives the cost from a built-in pricing table. An unrecognised
     model leaves cost unset rather than recording a misleading `0`.
 
     ## Delivery semantics
@@ -65,8 +65,8 @@ info:
     success response.
 
   contact:
-    name: PAO
-    url: https://github.com/Twice908/PAO
+    name: Norn
+    url: https://github.com/Twice908/Norn
   license:
     name: MIT
     identifier: MIT
@@ -205,7 +205,7 @@ paths:
       summary: Report OpenTelemetry traces
       description: |
         An OTLP/HTTP trace receiver. Point any OpenTelemetry exporter at this URL to
-        report to PAO without writing PAO-specific code.
+        report to Norn without writing Norn-specific code.
 
         Accepts `application/x-protobuf` and `application/json`, both optionally
         gzipped (`Content-Encoding: gzip`).
@@ -221,7 +221,7 @@ paths:
 
         ### How traces become runs
 
-        OTLP has no concept of a run, so PAO derives one: a **root span** (a span
+        OTLP has no concept of a run, so Norn derives one: a **root span** (a span
         with no parent) becomes the run, and its descendants become spans within it.
         The root is not also recorded as a child span, so its token counts are not
         double-counted in the run total.
@@ -360,7 +360,7 @@ components:
       type: http
       scheme: bearer
       description: |
-        A project API key, issued in the PAO dashboard and sent as
+        A project API key, issued in the Norn dashboard and sent as
         `Authorization: Bearer pk_live_...`.
 
   responses:
@@ -477,7 +477,7 @@ components:
           type: string
           minLength: 1
           description: |
-            Unique identifier for this span. Optional — when omitted, PAO generates
+            Unique identifier for this span. Optional — when omitted, Norn generates
             one. Supply your own if you need to reference the span as a
             `parentSpanId`.
         parentSpanId:
@@ -516,7 +516,7 @@ components:
           type: number
           minimum: 0
           description: |
-            Cost in USD. Omit to let PAO derive it from `model` and token counts.
+            Cost in USD. Omit to let Norn derive it from `model` and token counts.
             An explicit value always takes precedence.
         inputPreview:
           type: string
@@ -670,7 +670,7 @@ components:
         The JSON encoding of OTLP's `ExportTraceServiceRequest`, as defined by the
         [OpenTelemetry protocol](https://opentelemetry.io/docs/specs/otlp/). Trace
         and span IDs are hex strings. `snake_case` field names are accepted
-        alongside `camelCase`. Only the fields PAO reads are described here.
+        alongside `camelCase`. Only the fields Norn reads are described here.
       properties:
         resourceSpans:
           type: array
@@ -701,7 +701,7 @@ components:
       properties:
         traceId:
           type: string
-          description: Hex-encoded trace ID. Becomes the PAO `runId`.
+          description: Hex-encoded trace ID. Becomes the Norn `runId`.
           examples: [0102030405060708090a0b0c0d0e0f10]
         spanId:
           type: string

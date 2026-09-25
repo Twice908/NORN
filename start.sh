@@ -16,7 +16,7 @@ fi
 
 docker compose up -d --build
 
-for service in timescaledb redis api worker web; do
+for service in norn-timescaledb norn-redis norn-api norn-worker norn-web; do
   echo "Waiting for $service to become healthy..."
   until docker compose ps "$service" --format json 2>/dev/null | grep -q '"Health": "healthy"'; do
     if ! docker compose ps "$service" >/dev/null 2>&1; then
@@ -27,9 +27,9 @@ for service in timescaledb redis api worker web; do
 done
 
 echo
-printf 'PAO is running. Dashboard: http://localhost:3000\n'
+printf 'Norn is running. Dashboard: http://localhost:3000\n'
 printf 'API: http://localhost:3001\n'
-printf 'Database: postgres://pao:pao@localhost:5433/pao\n'
+printf 'Database: postgres://norn:norn@localhost:5433/norn\n'
 printf 'Redis: redis://localhost:6380\n\n'
 printf 'Next steps:\n'
 printf '  1. Edit .env and set your Clerk keys before signing in.\n'

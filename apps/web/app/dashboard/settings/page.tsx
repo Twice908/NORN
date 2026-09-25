@@ -122,7 +122,7 @@ export default function SettingsPage() {
       <div className="max-w-2xl mx-auto p-8 space-y-6">
         {AppearanceSection}
         {[1, 2, 3].map((i) => (
-          <div key={i} className="h-32 animate-pulse rounded-xl bg-gray-100" />
+          <div key={i} className="h-32 animate-norn rounded-xl bg-gray-100" />
         ))}
       </div>
     )
@@ -175,7 +175,7 @@ export default function SettingsPage() {
         <h2 className="text-base font-semibold text-gray-900 dark:text-slate-100">API Key</h2>
         <p className="text-sm text-gray-500 dark:text-slate-400">
           Use this key as the <code className="text-gray-600 dark:text-slate-300">apiKey</code> in the{' '}
-          <code className="text-gray-600 dark:text-slate-300">PulseAgent</code> SDK to send agent runs.
+          <code className="text-gray-600 dark:text-slate-300">NornAgent</code> SDK to send agent runs.
         </p>
         <div className="flex items-center gap-3">
           <code className="flex-1 rounded-lg border border-gray-200 dark:border-slate-600 bg-gray-50 dark:bg-slate-700 px-3 py-2 font-mono text-sm text-gray-700 dark:text-slate-100 select-none">

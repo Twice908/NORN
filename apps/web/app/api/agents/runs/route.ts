@@ -1,6 +1,6 @@
 import { auth } from '@/auth'
 import { NextResponse } from 'next/server'
-import { prisma } from '@pulse/db'
+import { prisma } from '@norn/db'
 import { requireProjectOwnership } from '@/lib/guards/project-ownership'
 
 const DEFAULT_LIMIT = 20

@@ -5,7 +5,7 @@ import { Bell, Cpu, Settings } from 'lucide-react'
 import { useProjects } from '@/hooks/useProjects'
 import { signOutAction } from '@/app/(auth)/actions'
 
-// PAO standalone only ships the Agents views. (In the full Pulse dashboard this
+// Norn standalone only ships the Agents views. (In the full Norn dashboard this
 // list also includes Logs, Analytics, Errors, Alerts, Uptime, Rate Limiter,
 // Drift, and Settings.)
 const NAV_ITEMS: Array<
@@ -48,7 +48,7 @@ export default function Sidebar() {
     >
       {/* Logo */}
       <div className="flex h-16 items-center px-6 border-b border-white/10">
-        <span className="text-lg font-bold text-white tracking-tight">PAO</span>
+        <span className="text-lg font-bold text-white tracking-tight">Norn</span>
         <span className="ml-2 rounded-full bg-indigo-600 px-2 py-0.5 text-xs font-medium text-white">
           beta
         </span>

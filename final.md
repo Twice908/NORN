@@ -1,4 +1,4 @@
-# PAO Deployment Readiness — Master Task List
+# Norn Deployment Readiness — Master Task List
 
 Here is every pending task, grouped by the 5 distribution outcomes you listed, arranged by priority and batched.
 
@@ -9,7 +9,7 @@ Here is every pending task, grouped by the 5 distribution outcomes you listed, a
 These gate everything else. Nothing ships until these are green.
 
 - [ ] **Rotate leaked secrets** — Clerk keys, Resend key, AUTH_SECRET (posted in chat earlier)
-- [ ] **Package name decision** — PAO name taken on npm + PyPI; finalize final name across all manifests
+- [ ] **Package name decision** — Norn name taken on npm + PyPI; finalize final name across all manifests
 - [ ] **Finalize NextAuth migration** — confirm Clerk removal is complete; delete legacy `clerkId` column once API no longer compiles against it
 - [ ] **Freeze the ingestion API contract** — `openapi.yaml` versioned, endpoints stable (`/v1/...`), Bearer key format locked
 - [ ] **Verify `./start.sh` on a clean machine** — fresh clone, no cache, no pre-existing `.env`
@@ -19,7 +19,7 @@ These gate everything else. Nothing ships until these are green.
 
 ## BATCH 2 — npm SDK (Distribution Way #1)
 
-- [ ] Finalize package name (`pulse-agent` unavailable → rename candidates or scope `@yourorg/...`)
+- [ ] Finalize package name (`norn-agent` unavailable → rename candidates or scope `@yourorg/...`)
 - [ ] Fill `package.json` fields: `repository.url` (exact case), `publishConfig.access`, `files`, `keywords`, `homepage`, `bugs`
 - [ ] Confirm `main` / `types` / `exports` resolve after `npm run build`
 - [ ] Register Trusted Publisher on npmjs.com
@@ -47,10 +47,10 @@ These gate everything else. Nothing ships until these are green.
 
 ## BATCH 4 — n8n Community Node (Distribution Way #3)
 
-- [ ] Create `n8n-nodes-pao` package (separate repo or subfolder)
-- [ ] Implement `PAO Log Run` node (ingestion client)
-- [ ] Implement `PAO Trigger` node (alert receiver)
-- [ ] Credentials type: PAO URL + API key
+- [ ] Create `n8n-nodes-norn` package (separate repo or subfolder)
+- [ ] Implement `Norn Log Run` node (ingestion client)
+- [ ] Implement `Norn Trigger` node (alert receiver)
+- [ ] Credentials type: Norn URL + API key
 - [ ] Provenance-enabled publish workflow
 - [ ] Submit to n8n community directory
 - [ ] Add usage docs + example workflow JSON
@@ -73,14 +73,14 @@ These gate everything else. Nothing ships until these are green.
 
 ---
 
-## BATCH 6 — PAO-Hosted SaaS (Distribution Way #5)
+## BATCH 6 — Norn-Hosted SaaS (Distribution Way #5)
 
-This is what **you (PAO org)** must deploy for end users of all 4 channels to see their logs if they don't self-host.
+This is what **you (Norn org)** must deploy for end users of all 4 channels to see their logs if they don't self-host.
 
 ### 6a. Infrastructure
 
-- [ ] Host the Next.js dashboard (`app.pao.dev` or similar)
-- [ ] Host the ingestion API (`ingest.pao.dev`)
+- [ ] Host the Next.js dashboard (`app.norn.dev` or similar)
+- [ ] Host the ingestion API (`ingest.norn.dev`)
 - [ ] Host the worker service
 - [ ] Managed TimescaleDB (Timescale Cloud / RDS / self-managed with backups)
 - [ ] Managed Redis (Upstash / ElastiCache)
@@ -132,7 +132,7 @@ This is what **you (PAO org)** must deploy for end users of all 4 channels to se
 - [ ] Load testing (k6 / Locust) — target X traces/sec
 - [ ] Cost model: infra cost per 1M traces
 - [ ] Incident response runbook
-- [ ] Status page (`status.pao.dev`)
+- [ ] Status page (`status.norn.dev`)
 
 ### 6f. Security
 
@@ -148,7 +148,7 @@ This is what **you (PAO org)** must deploy for end users of all 4 channels to se
 
 ### 6g. Public-facing surface
 
-- [ ] Marketing landing page (`pao.dev`)
+- [ ] Marketing landing page (`norn.dev`)
 - [ ] Pricing page
 - [ ] Signup / login pages (public)
 - [ ] Docs site (self-host + SaaS in one place)

@@ -1,7 +1,7 @@
-"""Type definitions for the Pulse Agent Observe (PAO) Python SDK.
+"""Type definitions for the Norn Agent Observe (Norn) Python SDK.
 
 `AgentSpanPayload` mirrors the TypeScript `AgentSpanPayload` type in
-`packages/pulse-agent/src/types.ts` field-for-field. `to_wire()` converts
+`packages/norn-agent/src/types.ts` field-for-field. `to_wire()` converts
 the Python (snake_case) representation into the camelCase JSON shape
 expected by `POST /ingest/agent-span`, dropping unset (`None`) fields the
 same way `JSON.stringify` drops `undefined` values in the npm package.

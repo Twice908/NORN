@@ -1,15 +1,15 @@
-# PAO Distribution Strategy — Reaching Agents Beyond the SDK
+# Norn Distribution Strategy — Reaching Agents Beyond the SDK
 
 **Status**: Research + plan. No implementation. Written 2026-08-25.
 
-Today PAO reaches agents through two code SDKs:
-[`@pulse/agent`](../packages/pulse-agent) (TypeScript) and
-[`pulse-agent`](../packages/pulse-agent-py) (Python). Both are thin wrappers
+Today Norn reaches agents through two code SDKs:
+[`@norn/agent`](../packages/norn-agent) (TypeScript) and
+[`norn-agent`](../packages/norn-agent-py) (Python). Both are thin wrappers
 over one HTTP contract. That covers developers who write agent code by hand.
 
 It does not cover the much larger population of agents that are *assembled*
 rather than *written*: n8n workflows, Zapier Zaps, Make scenarios, Voiceflow
-and Botpress bots. This document plans how PAO gets into those, ranked by
+and Botpress bots. This document plans how Norn gets into those, ranked by
 reach-per-unit-effort, with the platform constraints that actually govern
 each route.
 
@@ -49,7 +49,7 @@ Properties that matter for no-code distribution:
   *after* the fact, so a workflow can emit its whole trace at the end
   rather than instrumenting inline.
 
-**Implication**: PAO does not need a new backend to reach no-code. It needs
+**Implication**: Norn does not need a new backend to reach no-code. It needs
 packaging. That is the core insight of this plan.
 
 ### 1.1 The gaps to close first
@@ -96,9 +96,9 @@ using **OpenTelemetry GenAI semantic conventions**, with prompt/response
 recording toggled by `N8N_AGENTS_TRACING_RECORD_INPUTS` /
 `..._RECORD_OUTPUTS`.
 
-That is a near-exact structural match for PAO's data model:
+That is a near-exact structural match for Norn's data model:
 
-| n8n OTel | PAO |
+| n8n OTel | Norn |
 |---|---|
 | `workflow.execute` span | `run_start` + `run_end` |
 | `node.execute` span | `span` |
@@ -131,38 +131,38 @@ observable at once.
   `OTEL_SEMCONV_STABILITY_OPT_IN=gen_ai_latest_experimental` gates newer
   attribute sets. The mapper must be version-tolerant and treat unknown
   attributes as `metadata`, never fail a span.
-- Cost (`costUsd`) is generally *not* in the OTel payload. PAO would need a
+- Cost (`costUsd`) is generally *not* in the OTel payload. Norn would need a
   server-side pricing table keyed on `gen_ai.request.model` to derive it.
   This is worth building regardless — see §7.3.
 
 **Strategic value beyond n8n**: an OTLP endpoint is not an n8n feature. It
-simultaneously makes PAO a drop-in backend for LangChain/LlamaIndex via
+simultaneously makes Norn a drop-in backend for LangChain/LlamaIndex via
 OpenLLMetry, OpenInference instrumentors, Traceloop, and anything else in
 the OTel ecosystem — the entire code-agent world that isn't using our SDK.
 One endpoint, many ecosystems. **This is the single highest-ROI item in
 this document.**
 
-### 2.2 Route B: `n8n-nodes-pao` community node
+### 2.2 Route B: `n8n-nodes-norn` community node
 
 The canonical, discoverable path. Published to npm, tagged
-`n8n-community-node-package`, named `n8n-nodes-pao`.
+`n8n-community-node-package`, named `n8n-nodes-norn`.
 
 Planned node surface:
 
-- **PAO Trace (action)** — one node, operations: `Start Run`, `Log Span`,
+- **Norn Trace (action)** — one node, operations: `Start Run`, `Log Span`,
   `End Run`. Accepts run/span IDs so users can thread them through a
   workflow with expressions.
-- **PAO Wrap (action)** — the ergonomic version: drop it at the end of a
+- **Norn Wrap (action)** — the ergonomic version: drop it at the end of a
   workflow, point it at `$execution` data, and it emits an entire run in
   one call. This is the one most users will actually use, because it costs
   one node and one HTTP call.
-- **Credential type** — `paoApi`, fields: API key (password-typed), host
+- **Credential type** — `nornApi`, fields: API key (password-typed), host
   (defaults to production). Reused across nodes.
 
 **Verification requirements to design for from day one** (n8n's published
 guidelines):
 - Verified nodes may use **no runtime dependencies** — trivially satisfied,
-  since [`@pulse/agent`](../packages/pulse-agent) is already zero-runtime-dep
+  since [`@norn/agent`](../packages/norn-agent) is already zero-runtime-dep
   and the node can inline `fetch`.
 - Package license must be **MIT**.
 - One package integrates **exactly one** third-party service — satisfied.
@@ -173,7 +173,7 @@ guidelines):
 
 So the node repo must be its own public GitHub repo with a provenance
 release workflow — not buried in this monorepo's private release path.
-Plan for a dedicated `pao-n8n-nodes` repository.
+Plan for a dedicated `norn-n8n-nodes` repository.
 
 ### 2.3 Route C: external hooks (zero-touch, self-hosted)
 
@@ -182,7 +182,7 @@ separated paths). Relevant hooks: `workflow.preExecute`,
 `workflow.postExecute`, plus `n8n.ready` / `n8n.stop` for lifecycle.
 `workflow.preExecute` receives `[workflow, mode, workflowContext]`.
 
-Ship `pao-n8n-hook.js` — a single file a self-hoster drops in and points
+Ship `norn-n8n-hook.js` — a single file a self-hoster drops in and points
 the env var at. It instruments **every workflow on the instance** with no
 per-workflow edits. Lower fidelity than OTel (no per-node spans without
 extra work) but useful where OTel is unavailable or unwanted, and it is a
@@ -195,7 +195,7 @@ Priority: below A and B. It is a nice asset for the docs, not a headline.
 n8n's LangChain Code node allows configuring callbacks, which is precisely
 how the existing Langfuse community nodes
 (`n8n-nodes-ai-agent-langfuse`) attach tracing to `AgentExecutor` and
-`ToolCallingAgent`. A PAO callback handler would slot in the same way and
+`ToolCallingAgent`. A Norn callback handler would slot in the same way and
 capture LLM reasoning, tool calls, and token usage inside the agent node.
 
 Treat this as the **fallback fidelity path** for users on n8n versions
@@ -249,18 +249,18 @@ Zapier's public-integration bar is high and worth stating plainly:
   public listing — though the 50-user requirement can be **waived if the
   integration is embedded in-product behind a login screen**.
 
-Given PAO's current stage, the sequence is: build the CLI integration →
-use it privately / share via invite link → embed it in the PAO dashboard
+Given Norn's current stage, the sequence is: build the CLI integration →
+use it privately / share via invite link → embed it in the Norn dashboard
 to pursue the user-count waiver → publish.
 
 ### 3.3 Runtime constraints for the Code-step fallback
 
-Before the app exists, users can call PAO from **Code by Zapier**. Design
+Before the app exists, users can call Norn from **Code by Zapier**. Design
 docs around real limits: Code steps time out at **10s on Starter** and
 **30s on Pro/Team/Company**, and every action's `perform` must finish in
-30s. Since PAO ingest returns `202` immediately, this is comfortable — but
+30s. Since Norn ingest returns `202` immediately, this is comfortable — but
 docs should say "batch the whole run into one call at the end", never
-"call PAO per step", which would burn both tasks and time budget.
+"call Norn per step", which would burn both tasks and time budget.
 
 ---
 
@@ -299,8 +299,8 @@ Technology Partner / full approval later.
 
 ### 4.3 Interim path
 
-Make's **HTTP module** already works today with zero PAO effort. It is the
-"best pulse hook" for Make until the app ships — a documented recipe, not a
+Make's **HTTP module** already works today with zero Norn effort. It is the
+"best norn hook" for Make until the app ships — a documented recipe, not a
 product.
 
 ---
@@ -311,11 +311,11 @@ Split these two; they are not equivalent.
 
 **Botpress** is the better target: it has a real SDK/ADK, full API access,
 open-source integrations on GitHub, and a documented path to
-**publish an integration on the Botpress Hub**. Plan a proper PAO
+**publish an integration on the Botpress Hub**. Plan a proper Norn
 integration here, sized between the Make and Zapier efforts.
 
 **Voiceflow** is effectively closed for custom nodes. The realistic hook is
-its **API/function step** calling PAO's ingest route directly — a
+its **API/function step** calling Norn's ingest route directly — a
 documented recipe plus a copy-paste snippet, not a shipped artifact.
 
 For everything else in this tier (Flowise, Dify, Relevance, Lindy, Gumloop,
@@ -326,7 +326,7 @@ of §6. Do not build bespoke apps for the long tail.
 
 ## 6. The universal fallback: one documented HTTP recipe
 
-Every platform in the table has an HTTP/webhook module. That means PAO is
+Every platform in the table has an HTTP/webhook module. That means Norn is
 *already* integrable everywhere today — the missing piece is documentation,
 not code.
 
@@ -351,7 +351,7 @@ The rendered spec is hosted alongside it — see §7.2.
 
 ---
 
-## 7. Prerequisites in the PAO core
+## 7. Prerequisites in the Norn core
 
 Work that must land in this repo to support the above.
 
@@ -394,7 +394,7 @@ Implementation notes:
 
 Cost is not carried by OTLP in practice — §7.3's derivation supplies it.
 
-**Strategic payoff, as planned**: this single endpoint also makes PAO a
+**Strategic payoff, as planned**: this single endpoint also makes Norn a
 drop-in backend for OpenLLMetry, OpenInference, Traceloop, and any other
 OTel-instrumented agent, not just n8n.
 
@@ -476,7 +476,7 @@ caller believe a run was recorded when spans were dropped. A `400` naming the
 offending index is the honest signal.
 
 ### 7.6 Silent-data-loss bugs found and fixed — **DONE**
-Three defects that would have surfaced as "PAO randomly loses my runs" or
+Three defects that would have surfaced as "Norn randomly loses my runs" or
 "my runs are named wrong" the moment non-SDK callers arrived:
 
 1. **Spans missing `spanType`/`name` returned `202`, then died in the
@@ -523,7 +523,7 @@ OTLP, where a busy n8n instance legitimately pushes many exports.
 | — | ~~OpenAPI spec (§7.2)~~ — **done** | Prerequisite for Zapier publishing and Make app import |
 | — | ~~Universal HTTP recipe docs (§6) + host the rendered spec publicly~~ — **done** | Zero backend work, unblocked every platform at once |
 | — | ~~**OTLP ingest** (§7.1) + cost derivation (§7.3)~~ — **done** | Highest leverage in the document; unlocks n8n zero-config *and* the whole OTel code-agent ecosystem |
-| 2 | `n8n-nodes-pao` (§2.2) in its own repo with provenance CI | **Next.** Canonical discoverable presence on the most extension-friendly platform |
+| 2 | `n8n-nodes-norn` (§2.2) in its own repo with provenance CI | **Next.** Canonical discoverable presence on the most extension-friendly platform |
 | 3 | n8n external hook file (§2.3) | Zero-touch option for self-hosters who cannot use OTLP |
 | 4 | Make custom app → Community Apps (§4) | Declarative, moderate effort, no code-block constraint to fight |
 | 5 | Zapier CLI integration, private/embedded (§3) | Largest audience but longest publishing tail; start the clock, don't block on it |
@@ -539,13 +539,13 @@ universal items go first.
 ## 9. Open questions
 
 1. **Do we ingest OTel natively, or translate?** Native OTLP ingest is
-   proposed above. The alternative — shipping a PAO OTel *exporter* users
+   proposed above. The alternative — shipping a Norn OTel *exporter* users
    add to their collector — is more work for the user and less magic. This
    plan assumes native ingest; worth confirming before phase 1.
 2. **n8n Cloud users get nothing from Route A**, since OTel tracing is
    self-hosted only. Does the community node (Route B) adequately cover
    them, or does n8n Cloud need its own answer?
-3. **Zapier public listing requires PAO to be publicly launched** and to
+3. **Zapier public listing requires Norn to be publicly launched** and to
    have public API docs. That is a company-stage gate, not an engineering
    one. Confirm the timeline before investing in phase 5.
 4. **How much does the dashboard need to change** to render workflow-shaped

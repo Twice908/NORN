@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { apiFetch } from '@/lib/api'
-import type { ApiResponse, RegenerateKeyResponse } from '@pulse/types'
+import type { ApiResponse, RegenerateKeyResponse } from '@norn/types'
 
 interface RegenerateKeyModalProps {
   projectId: string

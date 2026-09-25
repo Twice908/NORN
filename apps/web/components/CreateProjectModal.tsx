@@ -87,7 +87,7 @@ export default function CreateProjectModal({ onClose, onCreated }: Props) {
             </div>
             <p className="text-xs text-gray-500">
               Use this key as the <code className="text-gray-400">apiKey</code> in the{' '}
-              <code className="text-gray-400">PulseAgent</code> SDK.
+              <code className="text-gray-400">NornAgent</code> SDK.
             </p>
             <button
               onClick={onClose}

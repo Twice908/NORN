@@ -91,7 +91,7 @@ model AlertEvent {
   agentRun       AgentRun? @relation(fields: [agentRunId], references: [id], onDelete: SetNull)
 }
 
-// ── PAO: Pulse Agent Observe ─────────────────────────────────────────────────
+// ── Norn: Norn Agent Observe ─────────────────────────────────────────────────
 
 model AgentDefinition {
   id        String   @id @default(cuid())

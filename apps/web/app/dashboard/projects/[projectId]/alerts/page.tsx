@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { auth } from '@/auth'
-import { prisma } from '@pulse/db'
+import { prisma } from '@norn/db'
 import AlertList from '@/components/alerts/AlertList'
 
 export default async function ProjectAlertsPage({ params }: { params: { projectId: string } }) {

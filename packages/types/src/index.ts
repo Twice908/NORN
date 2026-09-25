@@ -1,7 +1,7 @@
 export type PlanType = 'FREE' | 'STARTER' | 'PRO' | 'ENTERPRISE'
 
-// PAO uses the agent_* alert types; the rest are kept for parity with the
-// shared Alert model that PAO's alert engine writes to.
+// Norn uses the agent_* alert types; the rest are kept for parity with the
+// shared Alert model that Norn's alert engine writes to.
 export type AlertType =
   | 'agent_error_rate'
   | 'agent_token_threshold'

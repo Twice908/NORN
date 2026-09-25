@@ -1,7 +1,7 @@
 {
-  "name": "pao",
+  "name": "norn",
   "private": true,
-  "description": "Pulse Agent Observe (PAO) — standalone AI agent observability stack extracted from Pulse",
+  "description": "Norn Agent Observe — standalone AI agent observability stack",
   "packageManager": "npm@11.13.0",
   "workspaces": [
     "apps/*",
@@ -12,7 +12,7 @@
     "build": "turbo run build",
     "lint": "turbo run lint",
     "test": "turbo run test",
-    "test:e2e": "tsx scripts/test-pao-e2e.ts"
+    "test:e2e": "tsx scripts/test-norn-e2e.ts"
   },
   "devDependencies": {
     "concurrently": "^10.0.1",

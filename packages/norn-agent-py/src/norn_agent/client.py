@@ -1,4 +1,4 @@
-"""PulseAgent: mirrors `packages/pulse-agent/src/agent.ts`."""
+"""NornAgent: mirrors `packages/norn-agent/src/agent.ts`."""
 
 import os
 import threading
@@ -12,12 +12,12 @@ from .run import AgentRun
 from .types import AgentSpanPayload
 
 
-class PulseAgent:
+class NornAgent:
     """Entry point for instrumenting an agent run.
 
     Network calls are fire-and-forget (sent from a background thread) and
     never raise -- if the backend is unreachable, the SDK fails silently so
-    it can never break the host application. Set `PULSE_DISABLED=true` to
+    it can never break the host application. Set `NORN_DISABLED=true` to
     turn the SDK into a complete no-op (useful in tests/CI).
     """
 
@@ -31,7 +31,7 @@ class PulseAgent:
         self._api_key = api_key
         self._host = (base_url or host or DEFAULT_HOST).rstrip("/")
         self._flush_interval_ms = flush_interval_ms if flush_interval_ms is not None else DEFAULT_FLUSH_INTERVAL_MS
-        self._disabled = os.environ.get("PULSE_DISABLED") == "true"
+        self._disabled = os.environ.get("NORN_DISABLED") == "true"
         self._http: Optional[HttpClient] = None if self._disabled else HttpClient(self._host, api_key)
 
     def start_run(self, name: str, metadata: Optional[Dict[str, Any]] = None) -> AgentRun:

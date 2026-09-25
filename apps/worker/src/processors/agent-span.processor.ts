@@ -1,7 +1,7 @@
 import { Worker } from 'bullmq'
 import type { ConnectionOptions, Job } from 'bullmq'
 import pino from 'pino'
-import { prisma, Prisma } from '@pulse/db'
+import { prisma, Prisma } from '@norn/db'
 import { redis } from '../lib/redis'
 import { evaluateAgentRunAlerts } from '../lib/alert-evaluator'
 import { deriveCostUsd } from '../lib/pricing'
@@ -39,7 +39,7 @@ async function handleRunStart(data: AgentSpanJobData): Promise<void> {
   const { runId, projectId, task, startedAt } = data
 
   // Spans can outrun their run_start (OTLP exports each span in its own
-  // request, and PAO's own guard creates a placeholder run with an empty
+  // request, and Norn's own guard creates a placeholder run with an empty
   // task). Fill in the real task when we finally learn it, but never clear an
   // existing one with a blank.
   await prisma.agentRun.upsert({

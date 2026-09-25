@@ -26,7 +26,7 @@ async function bootstrap(): Promise<void> {
   await app.register(otlpTraceRoutes)
 
   const address = await app.listen({ port: parseInt(env.PORT), host: '0.0.0.0' })
-  app.log.info(`PAO API server listening at ${address}`)
+  app.log.info(`Norn API server listening at ${address}`)
 }
 
 bootstrap().catch((err: unknown) => {

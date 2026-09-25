@@ -1,6 +1,6 @@
 import { auth } from '@/auth'
 import { NextResponse } from 'next/server'
-import { prisma } from '@pulse/db'
+import { prisma } from '@norn/db'
 import { createHash, randomBytes } from 'node:crypto'
 import { requireProjectOwnership } from '@/lib/guards/project-ownership'
 

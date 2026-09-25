@@ -1,4 +1,4 @@
-"""HTTP transport for the Pulse Agent Observe (PAO) Python SDK.
+"""HTTP transport for the Norn Agent Observe (Norn) Python SDK.
 
 Sends batched span payloads to `POST /ingest/agent-span` with
 `Authorization: Bearer <api_key>`, matching the npm package's `_flush`
@@ -17,7 +17,7 @@ import httpx
 from .constants import INGEST_PATH
 from .types import AgentSpanPayload
 
-logger = logging.getLogger("pulse_agent")
+logger = logging.getLogger("norn_agent")
 
 MAX_RETRIES = 3
 INITIAL_BACKOFF_SECONDS = 0.5
@@ -50,14 +50,14 @@ class HttpClient:
                 if response.status_code < 500:
                     return
                 logger.debug(
-                    "pulse-agent: ingest returned %s (attempt %d/%d)",
+                    "norn-agent: ingest returned %s (attempt %d/%d)",
                     response.status_code,
                     attempt,
                     MAX_RETRIES,
                 )
             except Exception as exc:  # never let transport errors escape
                 logger.debug(
-                    "pulse-agent: ingest request failed (attempt %d/%d): %s",
+                    "norn-agent: ingest request failed (attempt %d/%d): %s",
                     attempt,
                     MAX_RETRIES,
                     exc,

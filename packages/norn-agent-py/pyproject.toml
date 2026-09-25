@@ -3,13 +3,14 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "pulse-agent"
+name = "norn-agent"
 version = "0.1.0"
-description = "Pulse Agent Observe (PAO) SDK for AI agent observability"
+description = "Norn Agent Observe SDK for AI agent observability"
 readme = "README.md"
 license = { text = "MIT" }
 requires-python = ">=3.9"
-authors = [{ name = "Pulse" }]
+authors = [{ name = "Norn" }]
+keywords = ["norn", "agent", "observability", "tracing", "llm"]
 dependencies = [
     "httpx>=0.24",
 ]
@@ -20,12 +21,12 @@ dev = [
 ]
 
 [project.urls]
-Homepage = "https://usepulse.dev"
-Repository = "https://github.com/Twice908/PAO.git"
-Issues = "https://github.com/Twice908/PAO/issues"
+Homepage = "https://github.com/Twice908/NORN"
+Repository = "https://github.com/Twice908/NORN.git"
+Issues = "https://github.com/Twice908/NORN/issues"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/pulse_agent"]
+packages = ["src/norn_agent"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

@@ -5,9 +5,9 @@ import { useSearchParams } from 'next/navigation'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useAlerts, useAlertHistory } from '@/hooks/useAlerts'
 import { useProjects } from '@/hooks/useProjects'
-import type { AlertRule, AlertChannel, AlertHistoryEntry } from '@pulse/types'
+import type { AlertRule, AlertChannel, AlertHistoryEntry } from '@norn/types'
 
-// PAO ships only the three agent alert types.
+// Norn ships only the three agent alert types.
 type AgentAlertType = 'agent_error_rate' | 'agent_token_threshold' | 'agent_execution_time'
 
 // ── helpers ──────────────────────────────────────────────────────────────────
@@ -598,7 +598,7 @@ export default function AlertsPage() {
         {isLoading ? (
           <div className="space-y-3">
             {[1, 2].map((i) => (
-              <div key={i} className="h-20 rounded-xl bg-gray-100 animate-pulse" />
+              <div key={i} className="h-20 rounded-xl bg-gray-100 animate-norn" />
             ))}
           </div>
         ) : alerts.length === 0 ? (
@@ -628,7 +628,7 @@ export default function AlertsPage() {
         <h2 className="text-lg font-semibold text-gray-900 dark:text-slate-100">Alert History</h2>
 
         {historyLoading ? (
-          <div className="h-40 rounded-xl bg-gray-100 animate-pulse" />
+          <div className="h-40 rounded-xl bg-gray-100 animate-norn" />
         ) : history.length === 0 ? (
           <div className="rounded-xl border border-dashed border-gray-300 dark:border-slate-700 bg-gray-50 dark:bg-slate-800 p-10 text-center">
             <p className="text-sm text-gray-500 dark:text-slate-400">No alerts have fired yet</p>

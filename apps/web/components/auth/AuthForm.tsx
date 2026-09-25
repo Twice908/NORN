@@ -31,12 +31,12 @@ export function AuthForm({
     <main className="flex min-h-screen items-center justify-center bg-slate-50 px-4 dark:bg-slate-950">
       <div className="w-full max-w-sm rounded-lg border border-slate-200 bg-white p-8 shadow-sm dark:border-slate-800 dark:bg-slate-900">
         <div className="mb-8 text-center">
-          <p className="text-lg font-bold tracking-tight text-slate-900 dark:text-white">PAO</p>
+          <p className="text-lg font-bold tracking-tight text-slate-900 dark:text-white">Norn</p>
           <h1 className="mt-5 text-2xl font-semibold text-slate-900 dark:text-white">
             {isSignIn ? 'Sign in' : 'Create your account'}
           </h1>
           <p className="mt-2 text-sm text-slate-500">
-            {isSignIn ? 'Access your agent observability dashboard.' : 'Run PAO on your own instance.'}
+            {isSignIn ? 'Access your agent observability dashboard.' : 'Run Norn on your own instance.'}
           </p>
         </div>
 

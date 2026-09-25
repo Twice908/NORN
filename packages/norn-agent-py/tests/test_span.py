@@ -1,6 +1,6 @@
-from pulse_agent.constants import MAX_PREVIEW_LENGTH
-from pulse_agent.span import AgentSpan
-from pulse_agent.types import StartSpanOpts
+from norn_agent.constants import MAX_PREVIEW_LENGTH
+from norn_agent.span import AgentSpan
+from norn_agent.types import StartSpanOpts
 
 STARTED_AT = "2024-01-01T00:00:00.000Z"
 

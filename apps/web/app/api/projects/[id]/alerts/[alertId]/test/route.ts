@@ -1,6 +1,6 @@
 import { auth } from '@/auth'
 import { NextResponse } from 'next/server'
-import { prisma } from '@pulse/db'
+import { prisma } from '@norn/db'
 import { requireProjectOwnership } from '@/lib/guards/project-ownership'
 
 export async function POST(
@@ -23,7 +23,7 @@ export async function POST(
   }
 
   const resendApiKey = process.env['RESEND_API_KEY']
-  const resendFrom = process.env['RESEND_FROM_EMAIL'] ?? 'alerts@pulse.dev'
+  const resendFrom = process.env['RESEND_FROM_EMAIL'] ?? 'alerts@norn.dev'
 
   try {
     if (alert.channel === 'email') {
@@ -39,7 +39,7 @@ export async function POST(
         body: JSON.stringify({
           from: resendFrom,
           to: alert.destination,
-          subject: 'Test alert from PAO',
+          subject: 'Test alert from Norn',
           html: `<div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:24px"><h2>Test Notification</h2><p>This is a test notification. Your alert channel is configured correctly.</p><p style="color:#6b7280;font-size:14px">Alert type: ${alert.type} · Project: ${params.id}</p></div>`,
         }),
       })
@@ -56,7 +56,7 @@ export async function POST(
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           blocks: [
-            { type: 'header', text: { type: 'plain_text', text: 'Test alert from PAO' } },
+            { type: 'header', text: { type: 'plain_text', text: 'Test alert from Norn' } },
             { type: 'section', text: { type: 'mrkdwn', text: 'This is a test notification. Your alert channel is configured correctly.' } },
             { type: 'context', elements: [{ type: 'mrkdwn', text: `Alert type: ${alert.type} · Project: ${params.id}` }] },
           ],

@@ -1,13 +1,13 @@
-# Contributing to PAO
+# Contributing to Norn
 
-Thanks for helping improve PAO, a self-hosted, privacy-first observability
+Thanks for helping improve Norn, a self-hosted, privacy-first observability
 stack for AI agents.
 
 ## Local development
 
 ```bash
-git clone https://github.com/<owner>/PAO.git
-cd PAO
+git clone https://github.com/Twice908/NORN.git
+cd NORN
 cp .env.example .env
 ./start.sh
 ```
@@ -40,7 +40,7 @@ docker compose up -d
 ```bash
 npm run build
 turbo run test
-pytest packages/pulse-agent-py/tests
+pytest packages/norn-agent-py/tests
 ```
 
 Run the relevant package checks before opening a pull request. Changes that
@@ -69,6 +69,6 @@ Before requesting review:
 
 ## Questions
 
-Ask questions in [GitHub Discussions](https://github.com/<owner>/PAO/discussions).
+Ask questions in [GitHub Discussions](https://github.com/Twice908/NORN/discussions).
 
 Please also read the [Code of Conduct](CODE_OF_CONDUCT.md) before contributing.

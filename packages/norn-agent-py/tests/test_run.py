@@ -2,12 +2,12 @@ import time
 
 import pytest
 
-from pulse_agent import PulseAgent
-from pulse_agent.constants import MAX_PREVIEW_LENGTH
+from norn_agent import NornAgent
+from norn_agent.constants import MAX_PREVIEW_LENGTH
 
 
 def _new_run(mock_http_send, **kwargs):
-    agent = PulseAgent(api_key="test-key", base_url="http://localhost:3000", **kwargs)
+    agent = NornAgent(api_key="test-key", base_url="http://localhost:3000", **kwargs)
     run = agent.start_run("Test task")
     mock_http_send.reset_mock()
     return run
@@ -149,7 +149,7 @@ def test_flush_timer_flushes_without_finalizing_run(mock_http_send, synchronous_
 
 
 def test_noop_run_makes_zero_http_calls(mock_http_send, synchronous_flush):
-    from pulse_agent import AgentRun
+    from norn_agent import AgentRun
 
     run = AgentRun.noop()
     span = run.start_span("llm_call", name="step-1")

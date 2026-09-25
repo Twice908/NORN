@@ -1,7 +1,7 @@
 import { auth } from '@/auth'
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
-import { prisma } from '@pulse/db'
+import { prisma } from '@norn/db'
 import { requireProjectOwnership } from '@/lib/guards/project-ownership'
 
 const agentMetricsSchema = z

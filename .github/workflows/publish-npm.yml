@@ -28,7 +28,7 @@ jobs:
         run: npm ci
 
       - name: Build npm package
-        run: npm run build -w packages/pulse-agent
+        run: npm run build -w packages/norn-agent
 
       - name: Publish to npm
-        run: npm publish --workspace packages/pulse-agent --access public --provenance
+        run: npm publish --workspace packages/norn-agent --access public --provenance

@@ -1,7 +1,7 @@
 import IORedis from 'ioredis'
 import { auth } from '@/auth'
 import { NextResponse } from 'next/server'
-import { prisma } from '@pulse/db'
+import { prisma } from '@norn/db'
 
 const HEARTBEAT_INTERVAL_MS = 30_000
 const INITIAL_RUN_LIMIT = 20

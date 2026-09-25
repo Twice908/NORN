@@ -1,5 +1,5 @@
 {
-  "name": "@pulse/web",
+  "name": "@norn/web",
   "version": "0.0.1",
   "private": true,
   "scripts": {
@@ -11,8 +11,8 @@
     "predev": "node scripts/build-api-docs.mjs"
   },
   "dependencies": {
-    "@pulse/db": "*",
-    "@pulse/types": "*",
+    "@norn/db": "*",
+    "@norn/types": "*",
     "@tanstack/react-query": "^5.62.7",
     "@tanstack/react-query-devtools": "^5.62.7",
     "bcryptjs": "^3.0.3",

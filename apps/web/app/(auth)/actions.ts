@@ -3,7 +3,7 @@
 import bcrypt from 'bcryptjs'
 import { AuthError } from 'next-auth'
 import { signIn, signOut } from '@/auth'
-import { prisma } from '@pulse/db'
+import { prisma } from '@norn/db'
 
 export type AuthActionState = { error?: string }
 

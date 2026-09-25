@@ -1,17 +1,17 @@
-# Building a Test Agent for PAO (Pulse Agent Observe)
+# Building a Test Agent for Norn (Norn Agent Observe)
 
 This doc gives you a ready-to-paste prompt (for Claude Code or any coding
 agent) plus hand-checked code references for wiring a real, Anthropic-powered
-AI agent to the PAO SDKs — one in TypeScript/Node, one in Python. The goal is
-to exercise the full PAO pipeline end-to-end: ingestion route → BullMQ worker
+AI agent to the Norn SDKs — one in TypeScript/Node, one in Python. The goal is
+to exercise the full Norn pipeline end-to-end: ingestion route → BullMQ worker
 → Postgres/Timescale → dashboard, using a genuine, heavy-duty multi-step
-agent — not synthetic seed data, not the `scripts/test-pao-e2e.ts` smoke
+agent — not synthetic seed data, not the `scripts/test-norn-e2e.ts` smoke
 test, and nothing simulated or faked inside the agent itself.
 
 Both SDKs referenced below already exist in this repo:
 
-- JS/TS: [`packages/pulse-agent`](../packages/pulse-agent) — package name `@pulse/agent`
-- Python: [`packages/pulse-agent-py`](../packages/pulse-agent-py) — package name `pulse-agent`
+- JS/TS: [`packages/norn-agent`](../packages/norn-agent) — package name `@norn/agent`
+- Python: [`packages/norn-agent-py`](../packages/norn-agent-py) — package name `norn-agent`
 
 Nothing here requires changes to the SDKs. It only builds a *consumer* of
 them (a test agent) in a new location, e.g. `examples/test-agent-ts/` and
@@ -60,7 +60,7 @@ calculate the percentage difference, and write a summary to the
 scratchpad"* naturally drives 3–6 real LLM round-trips and 3+ real tool
 calls, which is exactly the shape that produces a rich, honest span tree:
 
-- **`run_start`** — one PAO run per task.
+- **`run_start`** — one Norn run per task.
 - One **`llm_call`** span per real `messages.create` round-trip, with real
   `model`, `inputTokens`, `outputTokens` from the API's actual `usage`
   field, and an estimated `costUsd` from real published pricing.
@@ -83,17 +83,17 @@ token/cost rollups, and the detail panel all render correctly.
 ## Prompt to paste into Claude Code
 
 ```
-Build two standalone example AI agents in this repo that exercise the PAO
-(Pulse Agent Observe) pipeline end-to-end using the real Anthropic API. Do
-not modify packages/pulse-agent or packages/pulse-agent-py — only consume
+Build two standalone example AI agents in this repo that exercise the Norn
+(Norn Agent Observe) pipeline end-to-end using the real Anthropic API. Do
+not modify packages/norn-agent or packages/norn-agent-py — only consume
 them. Nothing about the agent's behavior should be faked, mocked, or
 scripted — every LLM call and every tool call must do real work and spend
 real tokens/credits when run. Do not add any "force failure" or simulated
 error paths; if a run fails, it must be because something genuinely failed.
 
 1. Create `examples/test-agent-ts/` (Node + TypeScript):
-   - Add `@pulse/agent` (workspace package) and `@anthropic-ai/sdk` as deps.
-   - `src/index.ts` reads `ANTHROPIC_API_KEY`, `PULSE_API_KEY`, `PULSE_HOST`,
+   - Add `@norn/agent` (workspace package) and `@anthropic-ai/sdk` as deps.
+   - `src/index.ts` reads `ANTHROPIC_API_KEY`, `NORN_API_KEY`, `NORN_HOST`,
      and (for the web_search tool) a real search API key such as
      `BRAVE_API_KEY` or `TAVILY_API_KEY` from env (use dotenv). If no search
      key is configured, fall back to a real `fetch()` against a URL passed
@@ -106,8 +106,8 @@ error paths; if a run fails, it must be because something genuinely failed.
      a local scratch file that later turns can read back via `read_file`).
    - Let Claude genuinely decide which tools to call and how many turns to
      take based on the task — do not hardcode a fixed tool sequence.
-   - Wrap the whole thing with the PAO SDK:
-     - `pulse.startRun(task)` once per task.
+   - Wrap the whole thing with the Norn SDK:
+     - `norn.startRun(task)` once per task.
      - `run.startSpan('llm_call', ...)` / `span.end(...)` (or
        `run.withLLMSpan`) around every real `messages.create` call, with
        real `model` and `inputTokens`/`outputTokens` from `response.usage`.
@@ -122,11 +122,11 @@ error paths; if a run fails, it must be because something genuinely failed.
      a free-tier search API key if the user doesn't have one.
 
 2. Create `examples/test-agent-py/` (Python) mirroring the same behavior:
-   - Add `pulse-agent` (path/editable dependency on packages/pulse-agent-py)
+   - Add `norn-agent` (path/editable dependency on packages/norn-agent-py)
      and `anthropic` (plus `httpx` for web_search) as deps.
    - `main.py` reads the same env vars via python-dotenv.
    - Same four real tools, same genuine multi-turn loop (no hardcoded tool
-     sequence, no simulated failures), using `pulse.start_run`,
+     sequence, no simulated failures), using `norn.start_run`,
      `run.with_llm_span` / `run.start_span` + `span.end`,
      `run.with_memory_span`, and `run.complete(status=...)` reflecting the
      real outcome.
@@ -141,7 +141,7 @@ error paths; if a run fails, it must be because something genuinely failed.
    examples typecheck/import cleanly and the agentic loop's control flow is
    correct by inspection.
 
-Reference docs/pao-test-agent.md in this repo for the exact PAO SDK method
+Reference docs/norn-test-agent.md in this repo for the exact Norn SDK method
 signatures on both sides (TS and Python) — the SDK's method names and
 kwarg conventions differ slightly between languages and that doc has
 verified code samples for both.
@@ -154,12 +154,12 @@ verified code samples for both.
 ```bash
 # .env
 ANTHROPIC_API_KEY=sk-ant-...        # you provide this later
-PULSE_API_KEY=pk_live_...           # a PAO Project API key (see Project model / dashboard)
-PULSE_HOST=http://localhost:4000    # or https://api.usepulse.dev in prod
+NORN_API_KEY=pk_live_...           # a Norn Project API key (see Project model / dashboard)
+NORN_HOST=http://localhost:4000    # or https://api.usepulse.dev in prod
 BRAVE_API_KEY=...                   # optional: real search tool (or TAVILY_API_KEY)
 ```
 
-`PULSE_API_KEY` is validated against the `Project` table via the existing
+`NORN_API_KEY` is validated against the `Project` table via the existing
 `Authorization: Bearer <key>` middleware in
 [`apps/api/src/lib/api-key.ts`](../apps/api/src/lib/api-key.ts) — use a key
 tied to whichever project you want the test runs to show up under in
@@ -171,19 +171,19 @@ to a real `fetch`/`httpx` GET against any public URL the task text mentions
 
 ---
 
-## TypeScript reference: `@pulse/agent` + Anthropic SDK
+## TypeScript reference: `@norn/agent` + Anthropic SDK
 
 ```ts
 // examples/test-agent-ts/src/index.ts
 import 'dotenv/config'
 import { readFile, appendFile } from 'node:fs/promises'
 import Anthropic from '@anthropic-ai/sdk'
-import { PulseAgent } from '@pulse/agent'
+import { NornAgent } from '@norn/agent'
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
-const pulse = new PulseAgent({
-  apiKey: process.env.PULSE_API_KEY!,
-  host: process.env.PULSE_HOST, // defaults to https://api.usepulse.dev
+const norn = new NornAgent({
+  apiKey: process.env.NORN_API_KEY!,
+  host: process.env.NORN_HOST, // defaults to https://api.usepulse.dev
 })
 
 const SCRATCHPAD_PATH = new URL('../scratchpad.txt', import.meta.url)
@@ -259,7 +259,7 @@ async function webSearch(query: string): Promise<string> {
 }
 
 async function executeTool(
-  run: Awaited<ReturnType<PulseAgent['startRun']>>,
+  run: Awaited<ReturnType<NornAgent['startRun']>>,
   toolUse: Anthropic.ToolUseBlock,
 ): Promise<Anthropic.ToolResultBlockParam> {
   const span = run.startSpan('tool_call', {
@@ -308,7 +308,7 @@ async function executeTool(
 // Real disk write, logged as memory activity (the agent's own working
 // memory across turns — not a canned lookup array).
 async function writeScratchpad(
-  run: Awaited<ReturnType<PulseAgent['startRun']>>,
+  run: Awaited<ReturnType<NornAgent['startRun']>>,
   note: string,
 ): Promise<string> {
   const span = run.startSpan('memory_read', {
@@ -335,7 +335,7 @@ function estimateCostUsd(usage: Anthropic.Usage): number {
 }
 
 async function runTask(task: string) {
-  const run = await pulse.startRun(task)
+  const run = await norn.startRun(task)
 
   try {
     const messages: Anthropic.MessageParam[] = [{ role: 'user', content: task }]
@@ -405,9 +405,9 @@ main()
 ```
 
 Notes on the JS SDK's actual behavior (verified against
-[`packages/pulse-agent/src`](../packages/pulse-agent/src)):
+[`packages/norn-agent/src`](../packages/norn-agent/src)):
 
-- `pulse.startRun(task, opts?)` fires the `run_start` payload immediately
+- `norn.startRun(task, opts?)` fires the `run_start` payload immediately
   and returns an `AgentRun` handle — no `await` needed before you start
   spans on it.
 - `run.startSpan(spanType, opts)` is synchronous and returns an `AgentSpan`
@@ -418,7 +418,7 @@ Notes on the JS SDK's actual behavior (verified against
   never show a terminal status in the dashboard.
 - `run.withLLMSpan({...})` and friends (`withMemorySpan`, `withHttpSpan`,
   `withDbSpan`, `withSearchSpan`, `withSubAgentSpan`, etc. — see
-  [`types.ts`](../packages/pulse-agent/src/types.ts)) are optional sugar
+  [`types.ts`](../packages/norn-agent/src/types.ts)) are optional sugar
   that wrap `startSpan` + `try/catch` + `span.end()` for you:
 
   ```ts
@@ -432,13 +432,13 @@ Notes on the JS SDK's actual behavior (verified against
   })
   ```
 
-- `PULSE_DISABLED=true` turns every PAO call into a no-op — useful for
+- `NORN_DISABLED=true` turns every Norn call into a no-op — useful for
   local unit tests of your tool functions, not for the real agent runs
-  you're using to test PAO.
+  you're using to test Norn.
 
 ---
 
-## Python reference: `pulse-agent` + Anthropic SDK
+## Python reference: `norn-agent` + Anthropic SDK
 
 ```python
 # examples/test-agent-py/main.py
@@ -450,14 +450,14 @@ from pathlib import Path
 import httpx
 from dotenv import load_dotenv
 from anthropic import Anthropic
-from pulse_agent import PulseAgent
+from norn_agent import NornAgent
 
 load_dotenv()
 
 anthropic = Anthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
-pulse = PulseAgent(
-    api_key=os.environ["PULSE_API_KEY"],
-    host=os.environ.get("PULSE_HOST"),  # defaults to https://api.usepulse.dev
+norn = NornAgent(
+    api_key=os.environ["NORN_API_KEY"],
+    host=os.environ.get("NORN_HOST"),  # defaults to https://api.usepulse.dev
 )
 
 SCRATCHPAD_PATH = Path(__file__).parent / "scratchpad.txt"
@@ -584,7 +584,7 @@ def execute_tool(run, tool_use) -> dict:
 
 
 def run_task(task: str) -> None:
-    run = pulse.start_run(task)
+    run = norn.start_run(task)
 
     try:
         messages = [{"role": "user", "content": task}]
@@ -645,12 +645,12 @@ if __name__ == "__main__":
 ```
 
 Notes on the Python SDK's actual behavior (verified against
-[`packages/pulse-agent-py/src/pulse_agent`](../packages/pulse-agent-py/src/pulse_agent)):
+[`packages/norn-agent-py/src/norn_agent`](../packages/norn-agent-py/src/norn_agent)):
 
-- `PulseAgent(api_key=..., host=...)` — the constructor also accepts
+- `NornAgent(api_key=..., host=...)` — the constructor also accepts
   `base_url` as an alias for `host`, and `flush_interval_ms` to override the
   default 30s auto-flush.
-- `pulse.start_run(name, metadata=None)` sends `run_start` from a background
+- `norn.start_run(name, metadata=None)` sends `run_start` from a background
   daemon thread (fire-and-forget, same pattern as JS's uncaught `fetch`).
 - `run.start_span(span_type, name="", **kwargs)` — unlike the JS API, this
   takes the span type and name as positional args; any kwarg not in
@@ -672,17 +672,17 @@ Notes on the Python SDK's actual behavior (verified against
   the block cleanly auto-ends the span with `status="success"`; an
   exception inside the block auto-ends it with `status="error"` and
   re-raises — see `_span_context` in
-  [`run.py`](../packages/pulse-agent-py/src/pulse_agent/run.py).
+  [`run.py`](../packages/norn-agent-py/src/norn_agent/run.py).
 - `run.complete(status=None, error_message=None, metadata=None)` is
   idempotent — safe to call more than once, and safe to call in a `finally`.
-- Set `PULSE_DISABLED=true` in the environment to no-op the whole SDK for
+- Set `NORN_DISABLED=true` in the environment to no-op the whole SDK for
   local unit tests of your tool functions.
 
 ---
 
 ## Verifying results in the dashboard
 
-After running either example against a real `PULSE_API_KEY`:
+After running either example against a real `NORN_API_KEY`:
 
 1. Open `/dashboard/agents?project=<projectId>` — you should see 2+ new
    runs, each with `status: completed` (or `failed`, honestly, if a tool
@@ -700,6 +700,6 @@ After running either example against a real `PULSE_API_KEY`:
    the sum of the `llm_call` spans' real `inputTokens`/`outputTokens`/
    `costUsd`.
 5. This is also the natural point to close out **Task 7.2** ("Verify data
-   scoping") from `docs/pao-tasks.md`: run the same test agent twice with
-   two different `PULSE_API_KEY`s (two projects) and confirm each
+   scoping") from `docs/norn-tasks.md`: run the same test agent twice with
+   two different `NORN_API_KEY`s (two projects) and confirm each
    dashboard only shows its own runs.

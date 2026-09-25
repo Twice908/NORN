@@ -1,5 +1,5 @@
 /**
- * Map one OTLP span onto PAO's span model.
+ * Map one OTLP span onto Norn's span model.
  *
  * Handles two producers explicitly:
  *   - GenAI-instrumented agents (OpenLLMetry, OpenInference, n8n >= 2.33 with
@@ -83,7 +83,7 @@ function nanosToIso(nanos: bigint | undefined): string | undefined {
 }
 
 /**
- * Decide PAO's span type.
+ * Decide Norn's span type.
  *
  * `gen_ai.operation.name` is the primary signal; span name and the presence of
  * tool/model attributes are fallbacks for instrumentations that omit it.
@@ -124,13 +124,13 @@ function resolveSpanType(
   if (lowerName.includes('embed') || lowerName.includes('retriev')) return 'memory_read'
 
   // n8n node.execute spans and anything else unrecognised: a workflow step is
-  // closest to a tool call in PAO's model.
+  // closest to a tool call in Norn's model.
   return 'tool_call'
 }
 
 /**
  * A root span is one with no parent, or one n8n marks as a whole workflow
- * execution. These become the PAO run rather than a span within it.
+ * execution. These become the Norn run rather than a span within it.
  */
 function resolveIsRoot(input: OtlpSpanInput, attrs: Record<string, AttributeValue>): boolean {
   if (input.name === 'workflow.execute') return true

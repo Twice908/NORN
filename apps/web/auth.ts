@@ -1,7 +1,7 @@
 import NextAuth, { type NextAuthResult } from 'next-auth'
 import Credentials from 'next-auth/providers/credentials'
 import bcrypt from 'bcryptjs'
-import { prisma } from '@pulse/db'
+import { prisma } from '@norn/db'
 
 const authConfig: NextAuthResult = NextAuth({
   trustHost: true,

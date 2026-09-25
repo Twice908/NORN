@@ -1,4 +1,4 @@
-export { PulseAgent } from './agent'
+export { NornAgent } from './agent'
 export { AgentRun } from './run'
 export { AgentSpan } from './span'
 export type {

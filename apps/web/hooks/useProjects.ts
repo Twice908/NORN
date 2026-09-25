@@ -2,7 +2,7 @@
 
 import { useQuery } from '@tanstack/react-query'
 import { apiFetch } from '@/lib/api'
-import type { ProjectSummary } from '@pulse/types'
+import type { ProjectSummary } from '@norn/types'
 
 // The project list is the only project read endpoint (there is no
 // GET /api/projects/:id), so single-project lookups derive from this cache.

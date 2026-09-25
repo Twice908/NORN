@@ -1,8 +1,8 @@
-# PAO vs. LangSmith
+# Norn vs. LangSmith
 
 ## TL;DR
 
-PAO is a free, self-hosted observability stack for AI agents. It stores agent
+Norn is a free, self-hosted observability stack for AI agents. It stores agent
 runs and spans in your own TimescaleDB, queues processing through Redis, and
 provides a local dashboard and alerting.
 
@@ -11,13 +11,13 @@ is a strong fit when you want a managed service, LangChain-native workflows,
 evaluation datasets, a playground, and team administration without operating
 those services yourself.
 
-Choose PAO when data ownership, local operation, and a self-hosted first setup
+Choose Norn when data ownership, local operation, and a self-hosted first setup
 matter most. Choose LangSmith when its managed collaboration and evaluation
 features are more important than running the data plane yourself.
 
 ## Feature comparison
 
-| Capability | PAO | LangSmith |
+| Capability | Norn | LangSmith |
 | --- | --- | --- |
 | Hosting | Self-hosted / free | SaaS |
 | Data ownership | You own TimescaleDB | LangChain Inc. |
@@ -34,43 +34,43 @@ product documentation before making a purchasing decision.
 
 ### Map concepts
 
-- LangSmith Runs map most closely to PAO `AgentRun` records.
-- LangSmith child runs and trace events map most closely to PAO `AgentSpan`
+- LangSmith Runs map most closely to Norn `AgentRun` records.
+- LangSmith child runs and trace events map most closely to Norn `AgentSpan`
   records.
-- A PAO project groups agent activity in the dashboard and scopes ingestion
+- A Norn project groups agent activity in the dashboard and scopes ingestion
   keys.
 
 These are conceptual mappings, not a claim of wire-level compatibility.
 
-### Point the SDK at PAO
+### Point the SDK at Norn
 
-Install and configure the PAO SDK for the language your agent uses. Set its API
-key and base URL to the PAO ingestion API, then send runs and spans through the
+Install and configure the Norn SDK for the language your agent uses. Set its API
+key and base URL to the Norn ingestion API, then send runs and spans through the
 SDK. A minimal TypeScript example is:
 
 ```ts
-import { PulseAgent } from '@pulse/agent'
+import { NornAgent } from '@norn/agent'
 
-const pulse = new PulseAgent({
-  apiKey: process.env.PULSE_API_KEY!,
+const norn = new NornAgent({
+  apiKey: process.env.NORN_API_KEY!,
   host: 'http://localhost:3001',
 })
 ```
 
-For Python, use `pulse-agent` and set `base_url` to the same PAO API host. The
+For Python, use `norn-agent` and set `base_url` to the same Norn API host. The
 SDKs are designed to send structured agent runs and spans; they do not translate
 LangSmith SDK calls automatically.
 
-### What PAO does not support yet
+### What Norn does not support yet
 
-PAO does not currently provide:
+Norn does not currently provide:
 
 - Evaluation datasets and experiment management
 - A prompt or trace playground
 - Team RBAC and managed organization administration
 - Automatic compatibility with every LangChain integration
 
-Plan a migration around the trace and alerting workflows that PAO currently
+Plan a migration around the trace and alerting workflows that Norn currently
 supports. Keep existing evaluation data and LangSmith-specific metadata in its
 original system until an explicit migration path exists.
 
@@ -81,13 +81,13 @@ LangChain integration depth, evaluation datasets, a playground, or mature team
 RBAC. It also avoids operating PostgreSQL, Redis, workers, upgrades, backups,
 and email delivery yourself.
 
-PAO is a reasonable choice when deployment must remain under your control,
+Norn is a reasonable choice when deployment must remain under your control,
 network access should stay local, or a hosted observability account is not
-acceptable. PAO also makes Mailpit available for local alert testing without
+acceptable. Norn also makes Mailpit available for local alert testing without
 sending data outside the development environment.
 
 ## Related documentation
 
-- [PAO README](../README.md)
+- [Norn README](../README.md)
 - [Mailpit setup](mailpit-setup.md)
 - [Deployment](deployment.md)

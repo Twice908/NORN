@@ -19,7 +19,7 @@ async function seedAgentRun(): Promise<void> {
     where: { apiKeyHash },
     update: {},
     create: {
-      name: 'PAO Seed Project',
+      name: 'Norn Seed Project',
       apiKeyHash,
       apiKeyPrefix: 'pk_seed',
       userId: user.id,

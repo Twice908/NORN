@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation'
 import { auth } from '@/auth'
-import { prisma } from '@pulse/db'
+import { prisma } from '@norn/db'
 import AlertForm from '@/components/alerts/AlertForm'
 import type { AlertInput } from '@/app/dashboard/projects/[projectId]/alerts/actions'
 

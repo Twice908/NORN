@@ -1,10 +1,10 @@
 import { auth } from '@/auth'
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
-import { prisma } from '@pulse/db'
+import { prisma } from '@norn/db'
 import { requireProjectOwnership } from '@/lib/guards/project-ownership'
 
-// PAO is agent-only — alerts are restricted to the three agent alert types.
+// Norn is agent-only — alerts are restricted to the three agent alert types.
 const ALERT_TYPES = ['agent_error_rate', 'agent_token_threshold', 'agent_execution_time'] as const
 const ALERT_CHANNELS = ['email', 'slack'] as const
 

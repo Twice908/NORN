@@ -1,7 +1,14 @@
 {
-  "name": "@pulse/agent",
+  "name": "@norn/agent",
   "version": "0.1.0",
-  "description": "Pulse Agent Observe (PAO) SDK for AI agent observability",
+  "description": "Norn Agent Observe (Norn) SDK for AI agent observability",
+  "keywords": [
+    "norn",
+    "agent",
+    "observability",
+    "tracing",
+    "llm"
+  ],
   "main": "dist/index.js",
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
@@ -18,7 +25,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Twice908/PAO.git"
+    "url": "https://github.com/Twice908/NORN.git"
   },
   "publishConfig": {
     "access": "public",

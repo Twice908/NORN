@@ -2,7 +2,7 @@
 
 import { useQuery } from '@tanstack/react-query'
 import { apiFetch } from '@/lib/api'
-import type { AlertRule, AlertHistoryEntry } from '@pulse/types'
+import type { AlertRule, AlertHistoryEntry } from '@norn/types'
 
 const ALERTS_STALE_TIME_MS = 60 * 1000
 

@@ -1,5 +1,5 @@
 import pino from 'pino'
-import { prisma } from '@pulse/db'
+import { prisma } from '@norn/db'
 import { sendAlertEmail } from './email'
 
 const logger = pino({ name: 'notifications' })
@@ -76,7 +76,7 @@ export async function dispatch(payload: NotificationPayload): Promise<void> {
 }
 
 async function sendEmail(payload: NotificationPayload, recipients: string[]): Promise<void> {
-  const subject = `[Pulse Alert] ${payload.alertType} triggered for ${payload.projectName}`
+  const subject = `[Norn Alert] ${payload.alertType} triggered for ${payload.projectName}`
   const dashboardUrl = process.env['NEXT_PUBLIC_APP_URL'] ?? 'http://localhost:3000'
 
   const html = `
@@ -106,7 +106,7 @@ async function sendSlack(payload: NotificationPayload): Promise<void> {
     blocks: [
       {
         type: 'header',
-        text: { type: 'plain_text', text: `Pulse Alert: ${payload.alertType}` },
+        text: { type: 'plain_text', text: `Norn Alert: ${payload.alertType}` },
       },
       {
         type: 'section',

@@ -10,7 +10,7 @@ COPY apps ./apps
 COPY packages ./packages
 
 RUN npm install --include=dev
-RUN npx turbo run build --filter=@pulse/web
+RUN npx turbo run build --filter=@norn/web
 
 
 FROM node:20.18.0-bookworm-slim AS runtime

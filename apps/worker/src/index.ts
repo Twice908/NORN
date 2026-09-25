@@ -53,7 +53,7 @@ registerAgentAlertsJob().catch((err: unknown) => {
 // ── Agent-span worker ─────────────────────────────────────────────────────────
 const agentSpanWorker = startAgentSpanWorker(connection)
 
-logger.info('PAO worker started — agent-spans + agent-alerts queues active')
+logger.info('Norn worker started — agent-spans + agent-alerts queues active')
 
 // ── Graceful shutdown ───────────────────────────────────────────────────────
 // Railway sends SIGTERM on redeploy/stop. Close the workers and queue cleanly
@@ -63,7 +63,7 @@ let shuttingDown = false
 async function shutdown(signal: string): Promise<void> {
   if (shuttingDown) return
   shuttingDown = true
-  logger.info({ signal }, 'Shutting down PAO worker')
+  logger.info({ signal }, 'Shutting down Norn worker')
   await Promise.allSettled([
     agentSpanWorker.close(),
     agentAlertsWorker.close(),

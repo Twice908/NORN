@@ -1,39 +1,41 @@
+name: norn
+
 services:
-  timescaledb:
+  norn-timescaledb:
     image: timescale/timescaledb:latest-pg15
-    container_name: pao-timescaledb
+    container_name: norn-timescaledb
     restart: unless-stopped
     environment:
-      POSTGRES_USER: pao
-      POSTGRES_PASSWORD: pao
-      POSTGRES_DB: pao
+      POSTGRES_USER: norn
+      POSTGRES_PASSWORD: norn
+      POSTGRES_DB: norn
     ports:
       - "5433:5432"
     volumes:
-      - pgdata:/var/lib/postgresql/data
+      - norn_pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U pao -d pao"]
+      test: ["CMD-SHELL", "pg_isready -U norn -d norn"]
       interval: 10s
       timeout: 5s
       retries: 10
 
-  redis:
+  norn-redis:
     image: redis:7-alpine
-    container_name: pao-redis
+    container_name: norn-redis
     restart: unless-stopped
     ports:
       - "6380:6379"
     volumes:
-      - redisdata:/data
+      - norn_redisdata:/data
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 10s
       timeout: 5s
       retries: 10
 
-  mailpit:
+  norn-mailpit:
     image: axllent/mailpit:latest
-    container_name: pao-mailpit
+    container_name: norn-mailpit
     restart: unless-stopped
     ports:
       - "8025:8025"
@@ -42,7 +44,7 @@ services:
       MP_SMTP_AUTH_ACCEPT_ANY: 1
       MP_SMTP_AUTH_ALLOW_INSECURE: 1
     volumes:
-      - mailpit-data:/data
+      - norn_mailpit-data:/data
     healthcheck:
       test: ["CMD-SHELL", "wget -qO- http://localhost:8025/api/v1/info || exit 1"]
       interval: 10s
@@ -50,45 +52,45 @@ services:
       retries: 3
       start_period: 5s
 
-  db-init:
+  norn-db-init:
     image: node:20.18.0-bookworm-slim
-    container_name: pao-db-init
+    container_name: norn-db-init
     working_dir: /workspace
     volumes:
       - .:/workspace
     environment:
-      DATABASE_URL: postgresql://pao:pao@timescaledb:5432/pao
-      PGPASSWORD: pao
+      DATABASE_URL: postgresql://norn:norn@norn-timescaledb:5432/norn
+      PGPASSWORD: norn
     depends_on:
-      timescaledb:
+      norn-timescaledb:
         condition: service_healthy
-      redis:
+      norn-redis:
         condition: service_healthy
     command: >
       bash -lc "apt-get update && apt-get install -y --no-install-recommends postgresql-client &&
       npm ci &&
       npx prisma migrate deploy --schema packages/db/prisma/schema.prisma &&
-      psql -h timescaledb -U pao -d pao -c \"CREATE EXTENSION IF NOT EXISTS timescaledb;\" &&
-      psql -h timescaledb -U pao -d pao -f packages/db/prisma/migrations/0002_agent_spans_hypertable/migration.sql"
+        psql -h norn-timescaledb -U norn -d norn -c \"CREATE EXTENSION IF NOT EXISTS timescaledb;\" &&
+        psql -h norn-timescaledb -U norn -d norn -f packages/db/prisma/migrations/0002_agent_spans_hypertable/migration.sql"
 
-  api:
+  norn-api:
     build:
       context: .
       dockerfile: apps/api/Dockerfile
-    container_name: pao-api
+    container_name: norn-api
     restart: unless-stopped
     depends_on:
-      db-init:
+      norn-db-init:
         condition: service_completed_successfully
-      redis:
+      norn-redis:
         condition: service_healthy
-      timescaledb:
+      norn-timescaledb:
         condition: service_healthy
     environment:
       NODE_ENV: production
       PORT: "3001"
-      DATABASE_URL: postgresql://pao:pao@timescaledb:5432/pao
-      REDIS_URL: redis://redis:6379
+      DATABASE_URL: postgresql://norn:norn@norn-timescaledb:5432/norn
+      REDIS_URL: redis://norn-redis:6379
       API_KEY_SECRET: ${API_KEY_SECRET:-}
       # The unchanged API still validates this legacy setting at startup. The
       # web app no longer uses the API's Clerk JWT stream path.
@@ -99,7 +101,7 @@ services:
       NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL: ${NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL:-/dashboard}
       NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL: ${NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL:-/dashboard}
       RESEND_API_KEY: ${RESEND_API_KEY:-}
-      RESEND_FROM_EMAIL: ${RESEND_FROM_EMAIL:-alerts@yourdomain.com}
+      RESEND_FROM_EMAIL: ${RESEND_FROM_EMAIL:-alerts@norn.local}
       NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-http://localhost:3000}
     ports:
       - "3001:3001"
@@ -109,33 +111,33 @@ services:
       timeout: 5s
       retries: 10
 
-  worker:
+  norn-worker:
     build:
       context: .
       dockerfile: apps/worker/Dockerfile
-    container_name: pao-worker
+    container_name: norn-worker
     restart: unless-stopped
     depends_on:
-      db-init:
+      norn-db-init:
         condition: service_completed_successfully
-      redis:
+      norn-redis:
         condition: service_healthy
-      timescaledb:
+      norn-timescaledb:
         condition: service_healthy
-      mailpit:
+      norn-mailpit:
         condition: service_healthy
     environment:
       NODE_ENV: production
-      DATABASE_URL: postgresql://pao:pao@timescaledb:5432/pao
-      REDIS_URL: redis://redis:6379
+      DATABASE_URL: postgresql://norn:norn@norn-timescaledb:5432/norn
+      REDIS_URL: redis://norn-redis:6379
       EMAIL_TRANSPORT: ${EMAIL_TRANSPORT:-smtp}
-      SMTP_HOST: mailpit
+      SMTP_HOST: norn-mailpit
       SMTP_PORT: 1025
       SMTP_SECURE: "false"
       SMTP_IGNORE_TLS: "true"
-      SMTP_FROM: ${SMTP_FROM:-alerts@pao.local}
+      SMTP_FROM: ${SMTP_FROM:-alerts@norn.local}
       RESEND_API_KEY: ${RESEND_API_KEY:-}
-      RESEND_FROM_EMAIL: ${RESEND_FROM_EMAIL:-alerts@yourdomain.com}
+      RESEND_FROM_EMAIL: ${RESEND_FROM_EMAIL:-alerts@norn.local}
       NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-http://localhost:3000}
     healthcheck:
       test: ["CMD-SHELL", "node -e \"const fs=require('fs'); const running=fs.readdirSync('/proc').filter(pid => /^\\d+$/.test(pid)).some(pid => { try { return fs.readFileSync('/proc/'+pid+'/cmdline','utf8').includes('dist/index.js') } catch { return false } }); process.exit(running ? 0 : 1)\""]
@@ -143,31 +145,31 @@ services:
       timeout: 5s
       retries: 10
 
-  web:
+  norn-web:
     build:
       context: .
       dockerfile: apps/web/Dockerfile
-    container_name: pao-web
+    container_name: norn-web
     restart: unless-stopped
     depends_on:
-      api:
+      norn-api:
         condition: service_healthy
-      redis:
+      norn-redis:
         condition: service_healthy
-      timescaledb:
+      norn-timescaledb:
         condition: service_healthy
     environment:
       NODE_ENV: production
       PORT: "3000"
-      DATABASE_URL: postgresql://pao:pao@timescaledb:5432/pao
-      REDIS_URL: redis://redis:6379
+      DATABASE_URL: postgresql://norn:norn@norn-timescaledb:5432/norn
+      REDIS_URL: redis://norn-redis:6379
       NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-http://localhost:3000}
-      INGESTION_API_URL: http://api:3001
+      INGESTION_API_URL: http://norn-api:3001
       AUTH_SECRET: ${AUTH_SECRET:-}
       AUTH_URL: ${AUTH_URL:-http://localhost:3000}
       NEXTAUTH_URL: ${NEXTAUTH_URL:-http://localhost:3000}
       RESEND_API_KEY: ${RESEND_API_KEY:-}
-      RESEND_FROM_EMAIL: ${RESEND_FROM_EMAIL:-alerts@yourdomain.com}
+      RESEND_FROM_EMAIL: ${RESEND_FROM_EMAIL:-alerts@norn.local}
     ports:
       - "3000:3000"
     healthcheck:
@@ -178,6 +180,9 @@ services:
       start_period: 30s
 
 volumes:
-  pgdata:
-  redisdata:
-  mailpit-data:
+  norn_pgdata:
+    name: norn_pgdata
+  norn_redisdata:
+    name: norn_redisdata
+  norn_mailpit-data:
+    name: norn_mailpit-data

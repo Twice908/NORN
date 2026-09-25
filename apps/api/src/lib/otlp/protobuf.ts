@@ -1,7 +1,7 @@
 /**
  * Minimal protobuf wire-format reader.
  *
- * Only the subset of OTLP's trace schema that PAO consumes is decoded. A
+ * Only the subset of OTLP's trace schema that Norn consumes is decoded. A
  * hand-rolled reader is used instead of a codegen library to keep the API's
  * dependency surface unchanged — the same constraint that keeps the SDK
  * zero-runtime-dep and lets a verified n8n node embed this logic later.

@@ -1,5 +1,5 @@
 {
-  "name": "@pulse/api",
+  "name": "@norn/api",
   "version": "0.0.1",
   "private": true,
   "scripts": {
@@ -16,8 +16,8 @@
     "@fastify/cors": "^9.0.0",
     "@fastify/helmet": "^11.1.0",
     "@fastify/rate-limit": "^9.1.0",
-    "@pulse/db": "*",
-    "@pulse/types": "*",
+    "@norn/db": "*",
+    "@norn/types": "*",
     "bullmq": "^5.0.0",
     "dotenv": "^16.4.0",
     "fastify": "^4.28.0",

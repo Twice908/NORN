@@ -1,23 +1,23 @@
-# PAO - Pulse Agent Observe
+# Norn - Norn Agent Observe
 
 <!-- Pending capture: add docs/assets/demo.gif after recording the local flow. -->
-![PAO demo](docs/assets/demo.gif)
+![Norn demo](docs/assets/demo.gif)
 
-PAO is a free, self-hosted, privacy-first observability stack for AI agents.
+Norn is a free, self-hosted, privacy-first observability stack for AI agents.
 It records agent runs and spans, token usage, cost, errors, and alert events in
 your own database.
 
-## Why PAO
+## Why Norn
 
 - **Private:** trace data stays in infrastructure you control.
 - **Self-hosted:** Docker Compose runs the database, queue, services, dashboard,
   and local alert inbox.
-- **Free:** PAO is MIT-licensed and has no required external account.
+- **Free:** Norn is MIT-licensed and has no required external account.
 
 ## Quick Start (Self-Hosted)
 
 ```bash
-git clone https://github.com/<owner>/PAO.git && cd PAO
+git clone https://github.com/Twice908/NORN.git && cd NORN
 cp .env.example .env   # then fill in AUTH_SECRET
 ./start.sh
 ```
@@ -77,8 +77,8 @@ apps/worker/    BullMQ processors and alert evaluation
 apps/web/       Next.js dashboard and local auth
 packages/db/   Prisma schema, migrations, and client
 packages/types Shared TypeScript types
-packages/pulse-agent/   Node SDK: @pulse/agent
-packages/pulse-agent-py/ Python SDK: pulse-agent
+packages/norn-agent/   Node SDK: @norn/agent
+packages/norn-agent-py/ Python SDK: norn-agent
 docs/           Operations, architecture, and migration guides
 ```
 
@@ -87,14 +87,14 @@ docs/           Operations, architecture, and migration guides
 ### Node SDK
 
 ```ts
-import { PulseAgent } from '@pulse/agent'
+import { NornAgent } from '@norn/agent'
 
-const pulse = new PulseAgent({
-  apiKey: process.env.PULSE_API_KEY!,
+const norn = new NornAgent({
+  apiKey: process.env.NORN_API_KEY!,
   host: 'http://localhost:3001',
 })
 
-const run = await pulse.startRun('Summarize quarterly report')
+const run = await norn.startRun('Summarize quarterly report')
 const span = run.startSpan('llm_call', { name: 'completion', model: 'gpt-4o' })
 span.end({ inputTokens: 210, outputTokens: 145, costUsd: 0.0053, status: 'success' })
 await run.complete({ status: 'completed' })
@@ -103,10 +103,10 @@ await run.complete({ status: 'completed' })
 ### Python SDK
 
 ```python
-from pulse_agent import PulseAgent
+from norn_agent import NornAgent
 
-pulse = PulseAgent(api_key="pk_live_...", base_url="http://localhost:3001")
-run = pulse.start_run("Summarize quarterly report")
+norn = NornAgent(api_key="pk_live_...", base_url="http://localhost:3001")
+run = norn.start_run("Summarize quarterly report")
 span = run.start_span("llm_call", model="gpt-4o")
 span.end(input_tokens=210, output_tokens=145, cost_usd=0.0053, status="success")
 run.complete(status="completed")
@@ -121,7 +121,7 @@ curl -X POST http://localhost:3001/ingest/agent-span \
   -d '{"runId":"demo-run","spanId":"demo-span","name":"llm_call","type":"llm_call","status":"success"}'
 ```
 
-Set `PULSE_DISABLED=true` to make either SDK a no-op, for example in tests.
+Set `NORN_DISABLED=true` to make either SDK a no-op, for example in tests.
 
 ## Alerts
 
@@ -136,14 +136,14 @@ Copy `.env.example` to `.env` and set the values appropriate for your setup.
 
 | Variable | Purpose | Local value |
 | --- | --- | --- |
-| `DATABASE_URL` | PostgreSQL/TimescaleDB connection | `...@localhost:5433/pao` |
+| `DATABASE_URL` | PostgreSQL/TimescaleDB connection | `...@localhost:5433/norn` |
 | `REDIS_URL` | BullMQ Redis connection | `redis://localhost:6380` |
 | `AUTH_SECRET` | Session signing secret | generated secret |
 | `AUTH_URL` | Auth callback base URL | `http://localhost:3000` |
 | `INGESTION_API_URL` | Dashboard API target | `http://localhost:3001` |
 | `EMAIL_TRANSPORT` | `smtp` or `resend` | `smtp` |
 | `SMTP_HOST` / `SMTP_PORT` | Local SMTP server | `mailpit` / `1025` |
-| `SMTP_FROM` | Alert sender in local mode | `alerts@pao.local` |
+| `SMTP_FROM` | Alert sender in local mode | `alerts@norn.local` |
 | `RESEND_API_KEY` | Optional production email key | unset locally |
 
 ## Development
@@ -153,7 +153,7 @@ npm install
 npm run dev
 npm run build
 turbo run test
-pytest packages/pulse-agent-py/tests
+pytest packages/norn-agent-py/tests
 ```
 
 To run the stack directly without the startup helper:
@@ -165,7 +165,7 @@ docker compose up -d
 ## Deployment
 
 See [docs/deployment.md](docs/deployment.md) for production notes and
-prebuilt GHCR images. See [PAO vs. LangSmith](docs/vs-langsmith.md) for a
+prebuilt GHCR images. See [Norn vs. LangSmith](docs/vs-langsmith.md) for a
 fact-based comparison and migration considerations.
 
 ## Contributing
@@ -174,4 +174,4 @@ Read [CONTRIBUTING.md](CONTRIBUTING.md) before opening a pull request.
 
 ## License
 
-PAO is released under the [MIT License](LICENSE).
+Norn is released under the [MIT License](LICENSE).

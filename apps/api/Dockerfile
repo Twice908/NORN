@@ -11,7 +11,7 @@ COPY apps ./apps
 COPY packages ./packages
 
 RUN npm install --include=dev
-RUN npx turbo run build --filter=@pulse/api
+RUN npx turbo run build --filter=@norn/api
 
 
 FROM node:20.18.0-bookworm-slim AS runtime

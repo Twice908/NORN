@@ -6,7 +6,7 @@ config({ path: resolve(__dirname, '../../.env') })
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  transpilePackages: ['@pulse/types', '@pulse/db'],
+  transpilePackages: ['@norn/types', '@norn/db'],
 
   // The rendered API reference is a static file generated into
   // public/docs/api/index.html by scripts/build-api-docs.mjs. Next serves

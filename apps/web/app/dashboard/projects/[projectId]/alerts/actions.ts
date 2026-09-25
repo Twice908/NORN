@@ -1,7 +1,7 @@
 'use server'
 
 import { auth } from '@/auth'
-import { prisma } from '@pulse/db'
+import { prisma } from '@norn/db'
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
 

@@ -9,7 +9,7 @@ export default async function HomePage() {
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-center bg-white">
-      <h1 className="text-5xl font-bold tracking-tight text-gray-900">PAO</h1>
+      <h1 className="text-5xl font-bold tracking-tight text-gray-900">Norn</h1>
       <p className="mt-4 text-lg text-gray-600">Observability for AI agents</p>
       <div className="mt-8 flex gap-4">
         <a

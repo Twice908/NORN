@@ -1,16 +1,16 @@
-# The universal HTTP recipe — send agent telemetry to PAO from anywhere
+# The universal HTTP recipe — send agent telemetry to Norn from anywhere
 
-**Audience**: anyone on a platform PAO has no dedicated connector for — n8n,
+**Audience**: anyone on a platform Norn has no dedicated connector for — n8n,
 Make, Zapier, Voiceflow, Botpress, Flowise, Dify, Relevance, Lindy, Gumloop,
 Stack AI, Retool Workflows, or a plain `curl`.
 
-Every one of those has an HTTP or webhook step. That is all PAO needs. This
+Every one of those has an HTTP or webhook step. That is all Norn needs. This
 page is the copy-paste recipe, plus the expression syntax each platform uses
 for the two values you have to generate yourself: a run ID and a timestamp.
 
 Reference documentation for the endpoints below is published at
-**<https://pao-web-beta.vercel.app/docs/api>**, and the machine-readable OpenAPI 3.1
-spec at **<https://pao-web-beta.vercel.app/openapi.yaml>** (import that into Make, or
+**<https://norn-web-beta.vercel.app/docs/api>**, and the machine-readable OpenAPI 3.1
+spec at **<https://norn-web-beta.vercel.app/openapi.yaml>** (import that into Make, or
 link it from a Zapier submission).
 
 > These docs URLs follow the web app's current deployment hostname. Move them to
@@ -102,7 +102,7 @@ Any non-empty string. It does **not** need to be a UUID, and there is no
 registration call: the first payload carrying a new `runId` creates the run.
 
 Prefer an ID your platform already has — an execution ID is ideal, because it
-makes a PAO run traceable back to the exact workflow execution.
+makes a Norn run traceable back to the exact workflow execution.
 
 | Platform | Expression |
 |---|---|
@@ -127,7 +127,7 @@ because that is the *default* output of both n8n's and Make's now-expressions.
 | Voiceflow / Botpress | `new Date().toISOString()` in a function step |
 | curl | `date -u +%Y-%m-%dT%H:%M:%SZ` |
 
-`spanId` you do **not** need to generate — PAO mints one server-side when you
+`spanId` you do **not** need to generate — Norn mints one server-side when you
 omit it. Supply your own only if you need `parentSpanId` to nest spans.
 
 ---
@@ -138,7 +138,7 @@ Only the things that actually bite.
 
 ### If your HTTP module cannot send a top-level JSON array
 
-Several no-code HTTP modules can only express a JSON *object* as a body. PAO
+Several no-code HTTP modules can only express a JSON *object* as a body. Norn
 accepts a bare object as a one-element batch, so send the payloads one at a
 time:
 
@@ -157,7 +157,7 @@ allows it.
 ### n8n
 
 Before hand-building anything, check whether the **zero-code OTLP route**
-covers you. Self-hosted n8n emits OpenTelemetry natively, and PAO ingests it
+covers you. Self-hosted n8n emits OpenTelemetry natively, and Norn ingests it
 directly — no workflow edits, every existing workflow becomes observable:
 
 ```
@@ -174,13 +174,13 @@ n8n Cloud, use the HTTP Request node with the recipe above.
 
 The **JSON** parameter type auto-converts its input into a real array, which is
 what the batch body needs — use it rather than pasting a string. The
-[OpenAPI spec](https://pao-web-beta.vercel.app/openapi.yaml) can be imported directly
+[OpenAPI spec](https://norn-web-beta.vercel.app/openapi.yaml) can be imported directly
 in the Apps Editor.
 
 ### Zapier
 
 Use **Code by Zapier** with `fetch`. Code steps time out at 10s on Starter and
-30s on Pro and above, and every action must finish within 30s. PAO returns
+30s on Pro and above, and every action must finish within 30s. Norn returns
 `202` without waiting for processing, so a batched call sits comfortably inside
 that — but a per-step call pattern can burn both the task and the time budget.
 
@@ -202,7 +202,7 @@ to install.
 
 Only `type`, `runId` and `startedAt` are required on every payload. Full
 details, including the OTLP attribute mapping, are at
-<https://pao-web-beta.vercel.app/docs/api>.
+<https://norn-web-beta.vercel.app/docs/api>.
 
 ### `run_start`
 
@@ -229,7 +229,7 @@ details, including the OTLP attribute mapping, are at
 | `parentSpanId` | no | set to nest a span under another |
 | `model` | no | enables automatic cost derivation |
 | `inputTokens` / `outputTokens` | no | non-negative integers |
-| `costUsd` | no | supply only if you already know it; otherwise PAO derives it |
+| `costUsd` | no | supply only if you already know it; otherwise Norn derives it |
 | `inputPreview` / `outputPreview` | no | max 500 characters |
 | `status` | no | `success`, `error`, `timeout` |
 | `errorMessage` | no | pair with `status: "error"` |

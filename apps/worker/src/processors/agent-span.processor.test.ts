@@ -31,7 +31,7 @@ const mockPrisma = vi.hoisted(() => ({
   },
 }))
 
-vi.mock('@pulse/db', () => ({
+vi.mock('@norn/db', () => ({
   prisma: mockPrisma,
   Prisma: {},
 }))
@@ -49,7 +49,7 @@ vi.mock('../env', () => ({
     NODE_ENV: 'test',
     DATABASE_URL: 'postgresql://localhost/test',
     REDIS_URL: 'redis://localhost:6379',
-    RESEND_FROM_EMAIL: 'alerts@pulse.dev',
+    RESEND_FROM_EMAIL: 'alerts@norn.dev',
   },
 }))
 

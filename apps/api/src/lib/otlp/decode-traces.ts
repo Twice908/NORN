@@ -1,9 +1,9 @@
 /**
- * Decode an OTLP ExportTraceServiceRequest (protobuf or JSON) into the PAO
+ * Decode an OTLP ExportTraceServiceRequest (protobuf or JSON) into the Norn
  * ingest payloads the existing agent-spans queue already understands.
  *
  * OTLP has no notion of a "run": a trace is just spans sharing a trace_id.
- * PAO needs an explicit run_start/run_end pair, so a root span is expanded
+ * Norn needs an explicit run_start/run_end pair, so a root span is expanded
  * into run_start + span + run_end. This keeps the worker and dashboard
  * unchanged — OTLP becomes a second front door onto the same pipeline.
  */
@@ -152,12 +152,12 @@ export function decodeTracesJson(body: unknown): DecodedTraces {
   return { spans, rejected }
 }
 
-// ── Expansion into PAO ingest payloads ───────────────────────────────────────
+// ── Expansion into Norn ingest payloads ───────────────────────────────────────
 
 export type PaoPayload = Record<string, unknown> & { type: 'run_start' | 'span' | 'run_end' }
 
 /**
- * Expand mapped spans into PAO payloads.
+ * Expand mapped spans into Norn payloads.
  *
  * A root span yields run_start + run_end so the run has a task name and a
  * terminal status. Non-root spans map 1:1. Ordering matters: run_start for a
